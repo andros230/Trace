@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Trace</string>
+    <string name="title_activity_show_trace_map">ShowTraceMap</string>
+</resources>
