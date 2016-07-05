@@ -5,10 +5,10 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.Spinner;
 
 import com.amap.api.maps.AMap;
+import com.amap.api.maps.AMapOptions;
 import com.amap.api.maps.MapView;
 import com.andros230.trace.dao.DbOpenHelper;
 import com.andros230.trace.utils.MapUtil;
@@ -19,7 +19,6 @@ import java.util.List;
 public class History extends Activity {
     private MapView mMapView;
     private AMap aMap;
-    private ListView list;
     private DbOpenHelper db;
 
     @Override
@@ -28,27 +27,38 @@ public class History extends Activity {
         setContentView(R.layout.activity_history);
         mMapView = (MapView) findViewById(R.id.history_map);
         mMapView.onCreate(savedInstanceState);
+        init();
+    }
+
+    private void init() {
         if (aMap == null) {
             aMap = mMapView.getMap();
+            aMap.getUiSettings().setLogoPosition(AMapOptions.LOGO_POSITION_BOTTOM_CENTER);
         }
         db = new DbOpenHelper(this);
 
-        list = (ListView) findViewById(R.id.history_listView);
-        list.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_expandable_list_item_1,getData()));
-
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        History_adapter adapter = new History_adapter(this, getData());
+        Spinner spinner = (Spinner) findViewById(R.id.history_spinner);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                new MapUtil(aMap).ShowTraceThread(db,getData().get(i));
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                String day = (String) adapterView.getItemAtPosition(i);
+                new MapUtil(aMap).ShowTraceThread(db, day);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
     }
 
-    public List<String> getData(){
+    public List<String> getData() {
+
         DbOpenHelper db = new DbOpenHelper(this);
         Cursor cur = db.queryHistory();
         List<String> data = new ArrayList<>();
-        while (cur.moveToNext()){
+        while (cur.moveToNext()) {
             data.add(cur.getString(0));
         }
         return data;
@@ -77,4 +87,6 @@ public class History extends Activity {
         super.onSaveInstanceState(outState);
         mMapView.onSaveInstanceState(outState);
     }
+
+
 }

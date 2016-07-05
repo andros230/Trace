@@ -61,7 +61,7 @@ public class DbOpenHelper extends SQLiteOpenHelper {
     //查询历史数据
     public Cursor queryHistory() {
         SQLiteDatabase db = this.getWritableDatabase();
-        String sql = "select distinct day from " + TABLE_NAME;
+        String sql = "select distinct day from " + TABLE_NAME + " order by time desc";
         Cursor cur = db.rawQuery(sql, null);
         return cur;
     }

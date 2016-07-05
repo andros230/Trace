@@ -18,10 +18,8 @@ import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
-import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
-import com.amap.api.maps.model.LatLng;
 import com.andros230.trace.bean.LatLngKit;
 import com.andros230.trace.dao.DbOpenHelper;
 import com.andros230.trace.utils.MapUtil;
@@ -119,7 +117,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
             //设置为高精度定位模式
             mLocationClientOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
             //定位时间间隔
-            mLocationClientOption.setInterval(1000 * 10);
+            mLocationClientOption.setInterval(1000 * 2);
             mLocationClient.setLocationOption(mLocationClientOption);
             mLocationClient.startLocation();
         }
