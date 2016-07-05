@@ -5,11 +5,11 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.widget.Chronometer;
 import android.widget.TextView;
 
@@ -21,15 +21,11 @@ import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
-import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.LatLng;
-import com.amap.api.maps.model.PolylineOptions;
 import com.andros230.trace.bean.LatLngKit;
 import com.andros230.trace.dao.DbOpenHelper;
+import com.andros230.trace.utils.MapUtil;
 import com.andros230.trace.utils.util;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends Activity implements LocationSource, AMapLocationListener {
     private MapView mMapView;
@@ -42,7 +38,6 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
     private String TAG = "MainActivity";
     private DbOpenHelper db;
     private TextView tv_lat, tv_lng, tv_provider, tv_accuracy;
-    boolean aMapLocationBool = true;
 
     private Chronometer chronometer;
 
@@ -55,6 +50,13 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         mMapView.onCreate(savedInstanceState);
         init();
         AlarmCPU();
+    }
+
+
+    public void History(View view) {
+        Intent intent = new Intent();
+        intent.setClass(this, History.class);
+        startActivity(intent);
     }
 
     private void init() {
@@ -84,14 +86,8 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
 
                 chronometer.setBase(SystemClock.elapsedRealtime());
 
-
                 double lat = aMapLocation.getLatitude();
                 double lng = aMapLocation.getLongitude();
-
-                if (aMapLocationBool) {
-                    aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 15));
-                    aMapLocationBool = false;
-                }
 
                 tv_lat.setText(lat + "");
                 tv_lng.setText(lng + "");
@@ -103,56 +99,11 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
                     latLng.setLat(lat + "");
                     latLng.setLng(lng + "");
                     db.insert(latLng);
-                    ShowTraceThread();
+                    new MapUtil(aMap).ShowTraceThread(db, util.getNowTime(false));
                 }
             } else {
                 Log.e(TAG, "定位失败,错误代码;" + aMapLocation.getErrorCode() + ",错误信息:" + aMapLocation.getErrorInfo());
             }
-        }
-    }
-
-    public void ShowTraceThread() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                ShowTrace();
-            }
-        }).start();
-    }
-
-    private void ShowTrace() {
-        Cursor cur = db.query();
-        String time2 = null;
-        List list = new ArrayList();
-        PolylineOptions polylineOptions = new PolylineOptions();
-        polylineOptions.width(20);
-        polylineOptions.setCustomTexture(BitmapDescriptorFactory.fromResource(R.drawable.map_alr));
-
-
-        while (cur.moveToNext()) {
-            double lat = cur.getDouble(1);
-            double lng = cur.getDouble(2);
-            String time = cur.getString(3);
-
-            if (util.compareTime(time2, time)) {
-                polylineOptions.add(new LatLng(lat, lng));
-                time2 = time;
-            } else {
-                list.add(polylineOptions);
-                polylineOptions = new PolylineOptions();
-                polylineOptions.width(20);
-                polylineOptions.setCustomTexture(BitmapDescriptorFactory.fromResource(R.drawable.map_alr));
-                time2 = null;
-            }
-        }
-        list.add(polylineOptions);
-        drawLine(list);
-    }
-
-    public void drawLine(List list) {
-        aMap.clear(true);
-        for (int i = 0; i < list.size(); i++) {
-            aMap.addPolyline((PolylineOptions)list.get(i));
         }
     }
 
@@ -168,7 +119,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
             //设置为高精度定位模式
             mLocationClientOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
             //定位时间间隔
-            mLocationClientOption.setInterval(1000 * 5);
+            mLocationClientOption.setInterval(1000 * 10);
             mLocationClient.setLocationOption(mLocationClientOption);
             mLocationClient.startLocation();
         }

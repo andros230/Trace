@@ -6,9 +6,15 @@ import java.util.Date;
 
 public class util {
 
-    public static String getNowTime() {
+
+    public static String getNowTime(boolean bool) {
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");    //设置时间格式
+            SimpleDateFormat sdf;
+            if (bool) {
+                sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");    //设置时间格式
+            } else {
+                sdf = new SimpleDateFormat("yyyy-MM-dd");    //设置时间格式
+            }
             Date curDate = new Date(System.currentTimeMillis());//获取当前时间
             String str = sdf.format(curDate);
             return str;
@@ -40,6 +46,7 @@ public class util {
 
         }
     }
+
 
 
 }

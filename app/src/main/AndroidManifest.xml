@@ -42,6 +42,8 @@
             android:name="com.amap.api.v2.apikey"
             android:value="5bbd18634bee2e31c42eeb56d9c6bd5b"/>
 
+        <activity android:name=".History">
+        </activity>
     </application>
 
 </manifest>
