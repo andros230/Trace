@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.widget.Chronometer;
 import android.widget.TextView;
 
 import com.amap.api.location.AMapLocation;
@@ -22,7 +23,6 @@ import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.LatLng;
-import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.PolylineOptions;
 import com.andros230.trace.bean.LatLngKit;
 import com.andros230.trace.dao.DbOpenHelper;
@@ -44,6 +44,9 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
     private TextView tv_lat, tv_lng, tv_provider, tv_accuracy;
     boolean aMapLocationBool = true;
 
+    private Chronometer chronometer;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +55,6 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         mMapView.onCreate(savedInstanceState);
         init();
         AlarmCPU();
-
     }
 
     private void init() {
@@ -60,6 +62,8 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         tv_lng = (TextView) findViewById(R.id.lng);
         tv_provider = (TextView) findViewById(R.id.provider);
         tv_accuracy = (TextView) findViewById(R.id.accuracy);
+        chronometer = (Chronometer) findViewById(R.id.chronometer);
+        chronometer.start();
 
         if (aMap == null) {
             aMap = mMapView.getMap();
@@ -69,16 +73,17 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
             aMap.setMyLocationType(AMap.LOCATION_TYPE_LOCATE);  // 设置定位的类型为定位模式 ，可以由定位、跟随或地图根据面向方向旋转几种//
             //SQLite
             db = new DbOpenHelper(this);
-
         }
     }
-
 
     @Override
     public void onLocationChanged(AMapLocation aMapLocation) {
         if (mListener != null && aMapLocation != null) {
             if (aMapLocation != null && aMapLocation.getErrorCode() == 0) {
                 mListener.onLocationChanged(aMapLocation);  // 显示系统小蓝点
+
+                chronometer.setBase(SystemClock.elapsedRealtime());
+
 
                 double lat = aMapLocation.getLatitude();
                 double lng = aMapLocation.getLongitude();
@@ -115,41 +120,40 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         }).start();
     }
 
-
     private void ShowTrace() {
-
         Cursor cur = db.query();
-        boolean bool = true;
         String time2 = null;
         List list = new ArrayList();
-        aMap.clear(true);
+        PolylineOptions polylineOptions = new PolylineOptions();
+        polylineOptions.width(20);
+        polylineOptions.setCustomTexture(BitmapDescriptorFactory.fromResource(R.drawable.map_alr));
+
+
         while (cur.moveToNext()) {
             double lat = cur.getDouble(1);
             double lng = cur.getDouble(2);
             String time = cur.getString(3);
 
             if (util.compareTime(time2, time)) {
-                //绘制路线
-                list.add(new LatLng(lat, lng));
+                polylineOptions.add(new LatLng(lat, lng));
                 time2 = time;
             } else {
-                drawLine(list);
-                list = new ArrayList();
+                list.add(polylineOptions);
+                polylineOptions = new PolylineOptions();
+                polylineOptions.width(20);
+                polylineOptions.setCustomTexture(BitmapDescriptorFactory.fromResource(R.drawable.map_alr));
                 time2 = null;
             }
-
         }
+        list.add(polylineOptions);
         drawLine(list);
     }
 
     public void drawLine(List list) {
-        PolylineOptions polylineOptions = new PolylineOptions();
-        polylineOptions.width(20);
-        polylineOptions.setCustomTexture(BitmapDescriptorFactory.fromResource(R.drawable.map_alr));
+        aMap.clear(true);
         for (int i = 0; i < list.size(); i++) {
-            polylineOptions.add((LatLng) list.get(i));
+            aMap.addPolyline((PolylineOptions)list.get(i));
         }
-        aMap.addPolyline(polylineOptions);
     }
 
 
@@ -164,7 +168,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
             //设置为高精度定位模式
             mLocationClientOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
             //定位时间间隔
-            mLocationClientOption.setInterval(1000 * 2);
+            mLocationClientOption.setInterval(1000 * 5);
             mLocationClient.setLocationOption(mLocationClientOption);
             mLocationClient.startLocation();
         }
@@ -173,7 +177,6 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
     @Override
     public void deactivate() {
     }
-
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
