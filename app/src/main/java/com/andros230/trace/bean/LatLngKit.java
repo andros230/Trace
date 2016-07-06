@@ -1,10 +1,16 @@
 package com.andros230.trace.bean;
 
 
-public class LatLngKit {
+import cn.bmob.v3.BmobObject;
+
+public class LatLngKit extends BmobObject{
     private String lat;
     private String lng;
     private String time;
+
+    public LatLngKit(){
+        this.setTableName("ccl23000");
+    }
 
     public String getLat() {
         return lat;

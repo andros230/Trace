@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Chronometer;
 import android.widget.TextView;
@@ -24,12 +23,16 @@ import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.PolylineOptions;
 import com.andros230.trace.bean.LatLngKit;
+import com.andros230.trace.bmob.bmobDao;
 import com.andros230.trace.dao.DbOpenHelper;
 import com.andros230.trace.utils.MapUtil;
 import com.andros230.trace.utils.util;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import cn.bmob.v3.Bmob;
+
 
 public class MainActivity extends Activity implements LocationSource, AMapLocationListener {
     private MapView mMapView;
@@ -53,6 +56,8 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         setContentView(R.layout.activity_main);
         mMapView = (MapView) findViewById(R.id.main_map);
         mMapView.onCreate(savedInstanceState);
+
+        Bmob.initialize(this, "eeb802dacc8153d5f4679cbcff1a8daf");
         init();
         AlarmCPU();
     }
@@ -72,6 +77,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         chronometer = (Chronometer) findViewById(R.id.chronometer);
         chronometer.start();
 
+
         if (aMap == null) {
             aMap = mMapView.getMap();
             aMap.setLocationSource(this);  //设置定位监听
@@ -84,6 +90,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         //SQLite
         db = new DbOpenHelper(this);
         latLngList = new ArrayList();
+
     }
 
     @Override
@@ -103,10 +110,14 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
                 tv_provider.setText(aMapLocation.getProvider());
 
                 if (aMapLocation.getAccuracy() < 50) {
-                    LatLngKit latLng = new LatLngKit();
-                    latLng.setLat(lat + "");
-                    latLng.setLng(lng + "");
-                    db.insert(latLng);
+                    LatLngKit kit = new LatLngKit();
+                    kit.setLat(lat + "");
+                    kit.setLng(lng + "");
+                    //保存到SQLITE
+                    db.insert(kit);
+                    //保存到服务器
+                    new bmobDao().save(kit);
+                    //绘制路线
                     drawLine(lat, lng);
                 }
             } else {
@@ -116,6 +127,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
     }
 
     boolean lineBool = true;
+
     public void drawLine(double lat, double lng) {
         latLngList.add(new LatLng(lat, lng));
         if (bool) {
@@ -125,7 +137,6 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
             } else {
                 List<PolylineOptions> list = MapUtil.lineList;
                 if (list != null) {
-                    Log.e("-------main","--");
                     aMap.clear(true);
                     for (int i = 0; i < list.size(); i++) {
                         aMap.addPolyline(list.get(i));
@@ -199,7 +210,6 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
             mLocationClient.onDestroy();
         }
     }
-
 
 
     //alarmManager可叫醒CPU,保证关闭屏后还可定位
