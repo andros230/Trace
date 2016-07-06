@@ -15,6 +15,7 @@ public class DbOpenHelper extends SQLiteOpenHelper {
     private String TAG = "DbOpenHelper";
     private static final String TABLE_NAME = "trace";
 
+
     public DbOpenHelper(Context context) {
         super(context, TABLE_NAME, null, 1);
     }
@@ -61,7 +62,7 @@ public class DbOpenHelper extends SQLiteOpenHelper {
     //查询历史数据
     public Cursor queryHistory() {
         SQLiteDatabase db = this.getWritableDatabase();
-        String sql = "select distinct day from " + TABLE_NAME + " order by time desc";
+        String sql = "select distinct day from " + TABLE_NAME + " order by time";
         Cursor cur = db.rawQuery(sql, null);
         return cur;
     }

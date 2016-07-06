@@ -20,10 +20,16 @@ import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
+import com.amap.api.maps.model.BitmapDescriptorFactory;
+import com.amap.api.maps.model.LatLng;
+import com.amap.api.maps.model.PolylineOptions;
 import com.andros230.trace.bean.LatLngKit;
 import com.andros230.trace.dao.DbOpenHelper;
 import com.andros230.trace.utils.MapUtil;
 import com.andros230.trace.utils.util;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends Activity implements LocationSource, AMapLocationListener {
     private MapView mMapView;
@@ -38,7 +44,8 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
     private TextView tv_lat, tv_lng, tv_provider, tv_accuracy;
 
     private Chronometer chronometer;
-
+    boolean bool = true;
+    private List<LatLng> latLngList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,9 +78,12 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
             aMap.getUiSettings().setMyLocationButtonEnabled(true);  //设置默认定位按键是否显示
             aMap.setMyLocationEnabled(true); // 设置为true表示显示定位层并可触发定位，false表示隐藏定位层并不可触发定位，默认是false
             aMap.setMyLocationType(AMap.LOCATION_TYPE_LOCATE);  // 设置定位的类型为定位模式 ，可以由定位、跟随或地图根据面向方向旋转几种//
-            //SQLite
-            db = new DbOpenHelper(this);
+
         }
+
+        //SQLite
+        db = new DbOpenHelper(this);
+        latLngList = new ArrayList();
     }
 
     @Override
@@ -97,12 +107,42 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
                     latLng.setLat(lat + "");
                     latLng.setLng(lng + "");
                     db.insert(latLng);
-                    new MapUtil(aMap).ShowTraceThread(db, util.getNowTime(false));
+                    drawLine(lat, lng);
                 }
             } else {
                 Log.e(TAG, "定位失败,错误代码;" + aMapLocation.getErrorCode() + ",错误信息:" + aMapLocation.getErrorInfo());
             }
         }
+    }
+
+    boolean lineBool = true;
+    public void drawLine(double lat, double lng) {
+        latLngList.add(new LatLng(lat, lng));
+        if (bool) {
+            if (lineBool) {
+                new MapUtil(this, aMap, false).ShowTraceThread(db, util.getNowTime(false));
+                lineBool = false;
+            } else {
+                List<PolylineOptions> list = MapUtil.lineList;
+                if (list != null) {
+                    Log.e("-------main","--");
+                    aMap.clear(true);
+                    for (int i = 0; i < list.size(); i++) {
+                        aMap.addPolyline(list.get(i));
+                    }
+                    PolylineOptions polylineOptions = new PolylineOptions();
+                    polylineOptions.width(20);
+                    polylineOptions.setCustomTexture(BitmapDescriptorFactory.fromResource(R.drawable.map_alr));
+                    for (int i = 0; i < latLngList.size(); i++) {
+                        polylineOptions.add(latLngList.get(i));
+                    }
+                    aMap.addPolyline(polylineOptions);
+                }
+
+            }
+
+        }
+
     }
 
 
@@ -127,6 +167,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
     public void deactivate() {
     }
 
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -138,6 +179,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         Log.i(TAG, "onResume");
         super.onResume();
         mMapView.onResume();
+        bool = true;
     }
 
     @Override
@@ -145,7 +187,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         Log.i(TAG, "onPause");
         super.onPause();
         mMapView.onPause();
-
+        bool = false;
     }
 
     @Override
@@ -159,14 +201,6 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
     }
 
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            moveTaskToBack(false);
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
-    }
 
     //alarmManager可叫醒CPU,保证关闭屏后还可定位
     public void AlarmCPU() {

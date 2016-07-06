@@ -36,15 +36,15 @@ public class History extends Activity {
             aMap.getUiSettings().setLogoPosition(AMapOptions.LOGO_POSITION_BOTTOM_CENTER);
         }
         db = new DbOpenHelper(this);
+        Spinner spinner = (Spinner) findViewById(R.id.history_spinner);
 
         History_adapter adapter = new History_adapter(this, getData());
-        Spinner spinner = (Spinner) findViewById(R.id.history_spinner);
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 String day = (String) adapterView.getItemAtPosition(i);
-                new MapUtil(aMap).ShowTraceThread(db, day);
+                new MapUtil(History.this, aMap, true).ShowTraceThread(db, day);
             }
 
             @Override
@@ -54,7 +54,6 @@ public class History extends Activity {
     }
 
     public List<String> getData() {
-
         DbOpenHelper db = new DbOpenHelper(this);
         Cursor cur = db.queryHistory();
         List<String> data = new ArrayList<>();
@@ -62,6 +61,10 @@ public class History extends Activity {
             data.add(cur.getString(0));
         }
         return data;
+    }
+
+    public void play(View view){
+
     }
 
     @Override

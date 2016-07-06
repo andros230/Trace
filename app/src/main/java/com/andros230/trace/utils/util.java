@@ -6,7 +6,6 @@ import java.util.Date;
 
 public class util {
 
-
     public static String getNowTime(boolean bool) {
         try {
             SimpleDateFormat sdf;
@@ -46,7 +45,5 @@ public class util {
 
         }
     }
-
-
 
 }

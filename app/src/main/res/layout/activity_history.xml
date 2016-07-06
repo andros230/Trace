@@ -12,9 +12,19 @@
         android:layout_height="match_parent">
     </com.amap.api.maps.MapView>
 
-    <Spinner
-        android:id="@+id/history_spinner"
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:orientation="vertical">
+
+        <Spinner
+            android:id="@+id/history_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
 
 </RelativeLayout>
