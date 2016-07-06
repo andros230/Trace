@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.util.Log;
 import android.view.View;
 import android.widget.Chronometer;
 import android.widget.TextView;
@@ -25,6 +24,7 @@ import com.amap.api.maps.model.PolylineOptions;
 import com.andros230.trace.bean.LatLngKit;
 import com.andros230.trace.bmob.BmobDao;
 import com.andros230.trace.dao.DbOpenHelper;
+import com.andros230.trace.utils.Logs;
 import com.andros230.trace.utils.MapUtil;
 import com.andros230.trace.utils.util;
 
@@ -88,7 +88,6 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         db = new DbOpenHelper(this);
         latLngList = new ArrayList();
         bmobDao = new BmobDao(db);
-
     }
 
 
@@ -111,7 +110,6 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
                     tv_accuracy.setText(aMapLocation.getAccuracy() + "");
                     tv_provider.setText(aMapLocation.getProvider());
 
-
                     if (aMapLocation.getAccuracy() < 50) {
                         LatLngKit kit = new LatLngKit();
                         kit.setLat(lat + "");
@@ -126,12 +124,12 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
                     temp_lat = lat;
                     temp_lng = lng;
                 } else {
-                    Log.e(TAG, "坐标没变");
+                    Logs.d(TAG, "坐标没变动");
                 }
 
             } else {
                 tv_status.setText("定位失败," + aMapLocation.getErrorInfo());
-                Log.e(TAG, "定位失败,错误代码;" + aMapLocation.getErrorCode() + ",错误信息:" + aMapLocation.getErrorInfo());
+                Logs.e(TAG, "定位失败,错误代码;" + aMapLocation.getErrorCode() + ",错误信息:" + aMapLocation.getErrorInfo());
             }
         }
     }
@@ -193,7 +191,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
 
     @Override
     protected void onResume() {
-        Log.i(TAG, "onResume");
+        Logs.d(TAG, "onResume");
         super.onResume();
         mMapView.onResume();
         bool = true;
@@ -201,7 +199,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
 
     @Override
     protected void onPause() {
-        Log.i(TAG, "onPause");
+        Logs.d(TAG, "onPause");
         super.onPause();
         mMapView.onPause();
         bool = false;
@@ -209,7 +207,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
 
     @Override
     protected void onDestroy() {
-        Log.i(TAG, "onDestroy");
+        Logs.d(TAG, "onDestroy");
         super.onDestroy();
         mMapView.onDestroy();
         if (mLocationClient == null) {

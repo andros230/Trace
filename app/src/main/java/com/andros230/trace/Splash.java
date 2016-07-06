@@ -7,6 +7,8 @@ import android.os.Handler;
 
 import com.andros230.trace.bmob.BmobDao;
 import com.andros230.trace.dao.DbOpenHelper;
+import com.andros230.trace.utils.Logs;
+
 import cn.bmob.v3.Bmob;
 
 
@@ -18,6 +20,7 @@ public class Splash extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
         Bmob.initialize(this, "eeb802dacc8153d5f4679cbcff1a8daf");
+        Logs.OPENDEBUG = true;
         db = new DbOpenHelper(this);
         //同步数据到服务器
         new BmobDao(db).insertBatch();

@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.andros230.trace.bean.LatLngKit;
+import com.andros230.trace.utils.Logs;
 import com.andros230.trace.utils.util;
 
 public class DbOpenHelper extends SQLiteOpenHelper {
@@ -23,18 +24,18 @@ public class DbOpenHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         String sql = "CREATE TABLE " + TABLE_NAME + " (id INTEGER primary key autoincrement, lat text, lng text, date text,time text, status text);";
         sqLiteDatabase.execSQL(sql);
-        Log.d(TAG, "创建数据库");
+        Logs.d(TAG, "创建数据库");
     }
 
 
     public void dropTable() {
         SQLiteDatabase db = this.getWritableDatabase();
-        Log.i(TAG, "删除数据库");
+        Logs.d(TAG, "删除数据库");
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
 
         String sql = "CREATE TABLE " + TABLE_NAME + " (id INTEGER primary key autoincrement, lat text, lng text, date text,time text, status text);";
         db.execSQL(sql);
-        Log.i(TAG, "删除数据库后再新建");
+        Logs.d(TAG, "删除数据库后再新建");
     }
 
 
@@ -52,7 +53,7 @@ public class DbOpenHelper extends SQLiteOpenHelper {
         cv.put("time", kit.getTime());
         cv.put("status", kit.getStatus());
         long row = db.insert(TABLE_NAME, null, cv);
-        Log.d(TAG, "增加数据" + row);
+        Logs.d(TAG, "增加数据" + row);
     }
 
     //查询某天数据

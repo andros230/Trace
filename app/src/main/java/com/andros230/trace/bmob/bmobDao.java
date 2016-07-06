@@ -1,10 +1,10 @@
 package com.andros230.trace.bmob;
 
 import android.database.Cursor;
-import android.util.Log;
 
 import com.andros230.trace.bean.LatLngKit;
 import com.andros230.trace.dao.DbOpenHelper;
+import com.andros230.trace.utils.Logs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +31,11 @@ public class BmobDao {
             @Override
             public void done(String s, BmobException e) {
                 if (e == null) {
-                    Log.i(TAG, "坐标成功保存到服务器");
+                    Logs.d(TAG, "坐标成功保存到服务器");
                     db.insert(kit, true);
                 } else {
                     db.insert(kit, false);
-                    Log.e(TAG, "坐标保存到服务器失败 " + e.getMessage());
+                    Logs.e(TAG, "坐标保存到服务器失败 " + e.getMessage());
                 }
             }
         });
@@ -61,20 +61,19 @@ public class BmobDao {
             kits.add(kit);
         }
         if (kits.size() != 0) {
-
             new BmobBatch().insertBatch(kits).doBatch(new QueryListListener<BatchResult>() {
                 @Override
                 public void done(List<BatchResult> list, BmobException e) {
                     if (e == null) {
-                        Log.e("------", "批量保存成功");
+                        Logs.d(TAG, "批量保存成功");
                         db.changeStatus();
                     } else {
-                        Log.e("------", "批量保存失败");
+                        Logs.e(TAG, "批量保存失败");
                     }
                 }
             });
         }else{
-            Log.e("------", "无需同步的数据");
+            Logs.d(TAG, "无需同步数据");
         }
     }
 }

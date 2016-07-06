@@ -4,7 +4,6 @@ package com.andros230.trace.utils;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
 
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
@@ -60,8 +59,6 @@ public class MapUtil {
             lng = cur.getDouble(2);
             String date = cur.getString(3);
             String time = cur.getString(4);
-            String status = cur.getString(5);
-            Log.e("---", status + "");
             if (util.compareTime(time2, date + " " + time)) {
                 polylineOptions.add(new LatLng(lat, lng));
                 time2 = date + " " + time;
