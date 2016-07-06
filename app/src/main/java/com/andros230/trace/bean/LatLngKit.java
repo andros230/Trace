@@ -3,13 +3,31 @@ package com.andros230.trace.bean;
 
 import cn.bmob.v3.BmobObject;
 
-public class LatLngKit extends BmobObject{
+public class LatLngKit extends BmobObject {
     private String lat;
     private String lng;
+    private String date;
     private String time;
+    private String status;
 
-    public LatLngKit(){
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public LatLngKit() {
         this.setTableName("ccl23000");
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getLat() {
@@ -35,8 +53,5 @@ public class LatLngKit extends BmobObject{
     public void setTime(String time) {
         this.time = time;
     }
-
-
-
 
 }

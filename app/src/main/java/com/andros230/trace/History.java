@@ -63,9 +63,6 @@ public class History extends Activity {
         return data;
     }
 
-    public void play(View view){
-
-    }
 
     @Override
     protected void onResume() {

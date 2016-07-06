@@ -23,15 +23,13 @@ import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.PolylineOptions;
 import com.andros230.trace.bean.LatLngKit;
-import com.andros230.trace.bmob.bmobDao;
+import com.andros230.trace.bmob.BmobDao;
 import com.andros230.trace.dao.DbOpenHelper;
 import com.andros230.trace.utils.MapUtil;
 import com.andros230.trace.utils.util;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import cn.bmob.v3.Bmob;
 
 
 public class MainActivity extends Activity implements LocationSource, AMapLocationListener {
@@ -44,11 +42,12 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
 
     private String TAG = "MainActivity";
     private DbOpenHelper db;
-    private TextView tv_lat, tv_lng, tv_provider, tv_accuracy;
+    private TextView tv_lat, tv_lng, tv_provider, tv_accuracy, tv_status;
 
     private Chronometer chronometer;
     boolean bool = true;
     private List<LatLng> latLngList;
+    private BmobDao bmobDao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +56,6 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         mMapView = (MapView) findViewById(R.id.main_map);
         mMapView.onCreate(savedInstanceState);
 
-        Bmob.initialize(this, "eeb802dacc8153d5f4679cbcff1a8daf");
         init();
         AlarmCPU();
     }
@@ -75,6 +73,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         tv_provider = (TextView) findViewById(R.id.provider);
         tv_accuracy = (TextView) findViewById(R.id.accuracy);
         chronometer = (Chronometer) findViewById(R.id.chronometer);
+        tv_status = (TextView) findViewById(R.id.tv_status);
         chronometer.start();
 
 
@@ -84,43 +83,54 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
             aMap.getUiSettings().setMyLocationButtonEnabled(true);  //设置默认定位按键是否显示
             aMap.setMyLocationEnabled(true); // 设置为true表示显示定位层并可触发定位，false表示隐藏定位层并不可触发定位，默认是false
             aMap.setMyLocationType(AMap.LOCATION_TYPE_LOCATE);  // 设置定位的类型为定位模式 ，可以由定位、跟随或地图根据面向方向旋转几种//
-
         }
 
-        //SQLite
         db = new DbOpenHelper(this);
         latLngList = new ArrayList();
+        bmobDao = new BmobDao(db);
 
     }
+
+
+    private double temp_lat;
+    private double temp_lng;
 
     @Override
     public void onLocationChanged(AMapLocation aMapLocation) {
         if (mListener != null && aMapLocation != null) {
             if (aMapLocation != null && aMapLocation.getErrorCode() == 0) {
                 mListener.onLocationChanged(aMapLocation);  // 显示系统小蓝点
-
                 chronometer.setBase(SystemClock.elapsedRealtime());
-
                 double lat = aMapLocation.getLatitude();
                 double lng = aMapLocation.getLongitude();
+                tv_status.setText("");
 
-                tv_lat.setText(lat + "");
-                tv_lng.setText(lng + "");
-                tv_accuracy.setText(aMapLocation.getAccuracy() + "");
-                tv_provider.setText(aMapLocation.getProvider());
+                if (temp_lat != lat && temp_lng != lng) {
+                    tv_lat.setText(lat + "");
+                    tv_lng.setText(lng + "");
+                    tv_accuracy.setText(aMapLocation.getAccuracy() + "");
+                    tv_provider.setText(aMapLocation.getProvider());
 
-                if (aMapLocation.getAccuracy() < 50) {
-                    LatLngKit kit = new LatLngKit();
-                    kit.setLat(lat + "");
-                    kit.setLng(lng + "");
-                    //保存到SQLITE
-                    db.insert(kit);
-                    //保存到服务器
-                    new bmobDao().save(kit);
-                    //绘制路线
-                    drawLine(lat, lng);
+
+                    if (aMapLocation.getAccuracy() < 50) {
+                        LatLngKit kit = new LatLngKit();
+                        kit.setLat(lat + "");
+                        kit.setLng(lng + "");
+                        kit.setDate(util.getNowTime(false));
+                        kit.setTime(util.getNowTime(true));
+                        //保存到服务器
+                        bmobDao.save(kit);
+                        //绘制路线
+                        drawLine(lat, lng);
+                    }
+                    temp_lat = lat;
+                    temp_lng = lng;
+                } else {
+                    Log.e(TAG, "坐标没变");
                 }
+
             } else {
+                tv_status.setText("定位失败," + aMapLocation.getErrorInfo());
                 Log.e(TAG, "定位失败,错误代码;" + aMapLocation.getErrorCode() + ",错误信息:" + aMapLocation.getErrorInfo());
             }
         }
@@ -149,13 +159,9 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
                     }
                     aMap.addPolyline(polylineOptions);
                 }
-
             }
-
         }
-
     }
-
 
     @Override
     public void activate(OnLocationChangedListener onLocationChangedListener) {
@@ -209,6 +215,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         if (mLocationClient == null) {
             mLocationClient.onDestroy();
         }
+        bmobDao.insertBatch();
     }
 
 

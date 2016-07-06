@@ -56,14 +56,15 @@ public class MapUtil {
         double lat = 0;
         double lng = 0;
         while (cur.moveToNext()) {
-
             lat = cur.getDouble(1);
-            Log.e("---", lat + "");
             lng = cur.getDouble(2);
+            String date = cur.getString(3);
             String time = cur.getString(4);
-            if (util.compareTime(time2, time)) {
+            String status = cur.getString(5);
+            Log.e("---", status + "");
+            if (util.compareTime(time2, date + " " + time)) {
                 polylineOptions.add(new LatLng(lat, lng));
-                time2 = time;
+                time2 = date + " " + time;
             } else {
                 list.add(polylineOptions);
                 polylineOptions = new PolylineOptions();

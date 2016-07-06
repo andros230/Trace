@@ -10,7 +10,7 @@ public class util {
         try {
             SimpleDateFormat sdf;
             if (bool) {
-                sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");    //设置时间格式
+                sdf = new SimpleDateFormat("HH:mm:ss");    //设置时间格式
             } else {
                 sdf = new SimpleDateFormat("yyyy-MM-dd");    //设置时间格式
             }
@@ -38,7 +38,7 @@ public class util {
             e.printStackTrace();
         }
 
-        if (min > 1) {
+        if (min > 10) {
             return false;
         } else {
             return true;

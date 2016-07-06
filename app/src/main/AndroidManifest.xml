@@ -27,7 +27,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -43,6 +43,8 @@
             android:value="5bbd18634bee2e31c42eeb56d9c6bd5b"/>
 
         <activity android:name=".History">
+        </activity>
+        <activity android:name=".MainActivity">
         </activity>
     </application>
 
