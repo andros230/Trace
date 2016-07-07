@@ -104,28 +104,28 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
                 double lng = aMapLocation.getLongitude();
                 tv_status.setText("");
 
-                if (temp_lat != lat && temp_lng != lng) {
-                    tv_lat.setText(lat + "");
-                    tv_lng.setText(lng + "");
-                    tv_accuracy.setText(aMapLocation.getAccuracy() + "");
-                    tv_provider.setText(aMapLocation.getProvider());
+                // if (temp_lat != lat && temp_lng != lng) {
+                tv_lat.setText(lat + "");
+                tv_lng.setText(lng + "");
+                tv_accuracy.setText(aMapLocation.getAccuracy() + "");
+                tv_provider.setText(aMapLocation.getProvider());
 
-                    if (aMapLocation.getAccuracy() < 50) {
-                        LatLngKit kit = new LatLngKit();
-                        kit.setLat(lat + "");
-                        kit.setLng(lng + "");
-                        kit.setDate(util.getNowTime(false));
-                        kit.setTime(util.getNowTime(true));
-                        //保存到服务器
-                        bmobDao.save(kit);
-                        //绘制路线
-                        drawLine(lat, lng);
-                    }
-                    temp_lat = lat;
-                    temp_lng = lng;
-                } else {
-                    Logs.d(TAG, "坐标没变动");
+                if (aMapLocation.getAccuracy() < 50) {
+                    LatLngKit kit = new LatLngKit();
+                    kit.setLat(lat + "");
+                    kit.setLng(lng + "");
+                    kit.setDate(util.getNowTime(false));
+                    kit.setTime(util.getNowTime(true));
+                    //保存到服务器
+                    bmobDao.save(kit);
+                    //绘制路线
+                    drawLine(kit);
                 }
+                temp_lat = lat;
+                temp_lng = lng;
+                //} else {
+                //   Logs.d(TAG, "坐标没变动");
+                //  }
 
             } else {
                 tv_status.setText("定位失败," + aMapLocation.getErrorInfo());
@@ -136,11 +136,15 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
 
     boolean lineBool = true;
 
-    public void drawLine(double lat, double lng) {
-        latLngList.add(new LatLng(lat, lng));
+    public void drawLine(LatLngKit kit) {
+        latLngList.add(new LatLng(Double.valueOf(kit.getLat()), Double.valueOf(kit.getLng())));
         if (bool) {
             if (lineBool) {
                 new MapUtil(this, aMap, false).ShowTraceThread(db, util.getNowTime(false));
+
+                kit.setMark(util.getNowTime(false));
+                bmobDao.checkMark(kit);
+
                 lineBool = false;
             } else {
                 List<PolylineOptions> list = MapUtil.lineList;
@@ -210,10 +214,10 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         Logs.d(TAG, "onDestroy");
         super.onDestroy();
         mMapView.onDestroy();
-        if (mLocationClient == null) {
+        if (mLocationClient != null) {
             mLocationClient.onDestroy();
         }
-        bmobDao.insertBatch();
+        bmobDao.updateData();
     }
 
 

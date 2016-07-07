@@ -9,7 +9,6 @@ import android.util.Log;
 
 import com.andros230.trace.bean.LatLngKit;
 import com.andros230.trace.utils.Logs;
-import com.andros230.trace.utils.util;
 
 public class DbOpenHelper extends SQLiteOpenHelper {
     private String TAG = "DbOpenHelper";
@@ -40,18 +39,17 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 
 
     public void insert(LatLngKit kit, boolean bool) {
-        if (bool) {
-            kit.setStatus("Y");
-        } else {
-            kit.setStatus("N");
-        }
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put("lat", kit.getLat());
         cv.put("lng", kit.getLng());
         cv.put("date", kit.getDate());
         cv.put("time", kit.getTime());
-        cv.put("status", kit.getStatus());
+        if (bool) {
+            cv.put("status", "Y");
+        }else {
+            cv.put("status", "N");
+        }
         long row = db.insert(TABLE_NAME, null, cv);
         Logs.d(TAG, "增加数据" + row);
     }
@@ -68,7 +66,7 @@ public class DbOpenHelper extends SQLiteOpenHelper {
     //查询历史数据
     public Cursor queryHistory() {
         SQLiteDatabase db = this.getWritableDatabase();
-        String sql = "select distinct date from " + TABLE_NAME + " order by time";
+        String sql = "select distinct date from " + TABLE_NAME + " where status = 'N'";
         Cursor cur = db.rawQuery(sql, null);
         return cur;
     }

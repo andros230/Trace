@@ -1,6 +1,8 @@
 package com.andros230.trace.bean;
 
 
+import com.andros230.trace.utils.util;
+
 import cn.bmob.v3.BmobObject;
 
 public class LatLngKit extends BmobObject {
@@ -8,7 +10,21 @@ public class LatLngKit extends BmobObject {
     private String lng;
     private String date;
     private String time;
-    private String status;
+    private String mark;
+
+
+    public LatLngKit() {
+        this.setTableName(util.macClassName);
+    }
+
+
+    public String getMark() {
+        return mark;
+    }
+
+    public void setMark(String mark) {
+        this.mark = mark;
+    }
 
     public String getDate() {
         return date;
@@ -18,17 +34,6 @@ public class LatLngKit extends BmobObject {
         this.date = date;
     }
 
-    public LatLngKit() {
-        this.setTableName("ccl23000");
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
 
     public String getLat() {
         return lat;
