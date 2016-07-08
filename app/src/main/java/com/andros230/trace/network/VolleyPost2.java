@@ -13,7 +13,7 @@ import com.android.volley.toolbox.Volley;
 import java.util.Map;
 
 public class VolleyPost2 {
-    private String TAG = "VolleyPost";
+    private String TAG = "VolleyPost2";
     private Context context;
     private VolleyCallBack2 callBack2;
     private Map<String, String> params;
@@ -30,7 +30,7 @@ public class VolleyPost2 {
 
     public void post() {
         RequestQueue requestQueue = Volley.newRequestQueue(context);
-        final StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+        StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 // 返回数据
@@ -52,4 +52,5 @@ public class VolleyPost2 {
         };
         requestQueue.add(postRequest);
     }
+
 }

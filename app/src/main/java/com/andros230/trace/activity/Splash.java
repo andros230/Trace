@@ -1,4 +1,4 @@
-package com.andros230.trace;
+package com.andros230.trace.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.widget.Toast;
 
+import com.andros230.trace.R;
 import com.andros230.trace.network.VolleyCallBack;
 import com.andros230.trace.network.VolleyPost;
 import com.andros230.trace.utils.Logs;
@@ -23,7 +24,6 @@ public class Splash extends Activity implements VolleyCallBack {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
         Logs.OPENDEBUG = true;
-
         registerUser();
 
     }

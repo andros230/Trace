@@ -24,7 +24,7 @@ public class MapUtil {
     private DbOpenHelper db;
     ProgressDialog dialog;
     private Context context;
-    public static List<PolylineOptions> lineList = null;
+    public static List<PolylineOptions> MainActivity_lineList = null;
     private String TAG = "MapUtil";
 
     public MapUtil(Context context, AMap aMap) {
@@ -67,9 +67,9 @@ public class MapUtil {
                 time2 = null;
             }
         }
-        aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 15));
+        aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 17));
         list.add(polylineOptions);
-        lineList = list;
+        MainActivity_lineList = list;
         drawLine(list);
     }
 
@@ -112,9 +112,8 @@ public class MapUtil {
             }
         }
 
-        aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 15));
+        aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 17));
         list.add(polylineOptions);
-        lineList = list;
         drawLine(list);
     }
 

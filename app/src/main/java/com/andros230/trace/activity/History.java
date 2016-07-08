@@ -1,4 +1,4 @@
-package com.andros230.trace;
+package com.andros230.trace.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -9,6 +9,7 @@ import android.widget.Spinner;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.AMapOptions;
 import com.amap.api.maps.MapView;
+import com.andros230.trace.R;
 import com.andros230.trace.network.VolleyCallBack;
 import com.andros230.trace.network.VolleyCallBack2;
 import com.andros230.trace.network.VolleyPost;
@@ -53,7 +54,6 @@ public class History extends Activity implements VolleyCallBack, VolleyCallBack2
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 String date = (String) adapterView.getItemAtPosition(i);
-                Logs.d(TAG, date + "aa230");
                 Map<String, String> params = new HashMap<>();
                 params.put("uid", util.readUid(History.this));
                 params.put("date", date);

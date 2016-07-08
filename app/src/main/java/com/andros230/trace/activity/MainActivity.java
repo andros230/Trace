@@ -1,4 +1,4 @@
-package com.andros230.trace;
+package com.andros230.trace.activity;
 
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -8,20 +8,24 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Chronometer;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
+import com.amap.api.maps.AMapOptions;
 import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.PolylineOptions;
+import com.andros230.trace.R;
 import com.andros230.trace.bean.LatLngKit;
 import com.andros230.trace.dao.DbOpenHelper;
 import com.andros230.trace.network.VolleyCallBack;
@@ -60,7 +64,6 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         mMapView.onCreate(savedInstanceState);
         init();
         AlarmCPU();
-        updateDate();
     }
 
     public void History(View view) {
@@ -80,6 +83,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
 
         if (aMap == null) {
             aMap = mMapView.getMap();
+            aMap.getUiSettings().setLogoPosition(AMapOptions.LOGO_POSITION_BOTTOM_CENTER);
             aMap.setLocationSource(this);  //设置定位监听
             aMap.getUiSettings().setMyLocationButtonEnabled(true);  //设置默认定位按键是否显示
             aMap.setMyLocationEnabled(true); // 设置为true表示显示定位层并可触发定位，false表示隐藏定位层并不可触发定位，默认是false
@@ -99,32 +103,34 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         if (mListener != null && aMapLocation != null) {
             if (aMapLocation != null && aMapLocation.getErrorCode() == 0) {
                 mListener.onLocationChanged(aMapLocation);  // 显示系统小蓝点
-                chronometer.setBase(SystemClock.elapsedRealtime());
                 double lat = aMapLocation.getLatitude();
                 double lng = aMapLocation.getLongitude();
-                tv_status.setText("");
 
-                // if (temp_lat != lat && temp_lng != lng) {
-                tv_lat.setText(lat + "");
-                tv_lng.setText(lng + "");
-                tv_accuracy.setText(aMapLocation.getAccuracy() + "");
-                tv_provider.setText(aMapLocation.getProvider());
-
-                if (aMapLocation.getAccuracy() < 50) {
-                    LatLngKit kit = new LatLngKit();
-                    kit.setLat(lat + "");
-                    kit.setLng(lng + "");
-                    kit.setDate(util.getNowTime(false));
-                    kit.setTime(util.getNowTime(true));
-                    db.insert(kit);
-                    //绘制路线
-                    drawLine(kit);
+                if (bool) {
+                    chronometer.setBase(SystemClock.elapsedRealtime());
+                    tv_status.setText("");
+                    tv_lat.setText(lat + "");
+                    tv_lng.setText(lng + "");
+                    tv_accuracy.setText(aMapLocation.getAccuracy() + "");
+                    tv_provider.setText(aMapLocation.getProvider());
                 }
-                temp_lat = lat;
-                temp_lng = lng;
-                //} else {
-                //   Logs.d(TAG, "坐标没变动");
-                //  }
+
+                if (temp_lat != lat && temp_lng != lng) {
+                    if (aMapLocation.getAccuracy() < 50) {
+                        LatLngKit kit = new LatLngKit();
+                        kit.setLat(lat + "");
+                        kit.setLng(lng + "");
+                        kit.setDate(util.getNowTime(false));
+                        kit.setTime(util.getNowTime(true));
+                        db.insert(kit);
+                        //绘制路线
+                        drawLine(kit);
+                    }
+                    temp_lat = lat;
+                    temp_lng = lng;
+                } else {
+                    Logs.d(TAG, "坐标没变动");
+                }
 
             } else {
                 tv_status.setText("定位失败," + aMapLocation.getErrorInfo());
@@ -136,13 +142,15 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
     boolean lineBool = true;
 
     public void drawLine(LatLngKit kit) {
-        latLngList.add(new LatLng(Double.valueOf(kit.getLat()), Double.valueOf(kit.getLng())));
+        if (kit != null) {
+            latLngList.add(new LatLng(Double.valueOf(kit.getLat()), Double.valueOf(kit.getLng())));
+        }
         if (bool) {
             if (lineBool) {
                 new MapUtil(this, aMap).ShowTraceThread(db);
                 lineBool = false;
             } else {
-                List<PolylineOptions> list = MapUtil.lineList;
+                List<PolylineOptions> list = MapUtil.MainActivity_lineList;
                 if (list != null) {
                     aMap.clear(true);
                     for (int i = 0; i < list.size(); i++) {
@@ -171,7 +179,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
             //设置为高精度定位模式
             mLocationClientOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
             //定位时间间隔
-            mLocationClientOption.setInterval(1000 * 2);
+            mLocationClientOption.setInterval(1000 * 5);
             mLocationClient.setLocationOption(mLocationClientOption);
             mLocationClient.startLocation();
         }
@@ -192,7 +200,10 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         Logs.d(TAG, "onResume");
         super.onResume();
         mMapView.onResume();
+        //绘制路线
         bool = true;
+        drawLine(null);
+        updateDate();
     }
 
     @Override
@@ -206,12 +217,28 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
     @Override
     protected void onDestroy() {
         Logs.d(TAG, "onDestroy");
-        updateDate();
         super.onDestroy();
         mMapView.onDestroy();
         if (mLocationClient != null) {
             mLocationClient.onDestroy();
         }
+    }
+
+    private long exitTime = 0;
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+            if ((System.currentTimeMillis() - exitTime) > 2000) {
+                Toast.makeText(getApplicationContext(), "再按一次退出程序", Toast.LENGTH_SHORT).show();
+                exitTime = System.currentTimeMillis();
+            } else {
+                finish();
+                System.exit(0);
+            }
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     //alarmManager可叫醒CPU,保证关闭屏后还可定位
@@ -243,11 +270,14 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
             kits.add(kit);
         }
 
-        Gson gson = new Gson();
-        String json = gson.toJson(kits);
-        Map<String, String> params = new HashMap<>();
-        params.put("json", json);
-        new VolleyPost(this, this, util.ServerUrl + "SaveLatLng", params).post();
+        Logs.d(TAG, kits.size() + "");
+        if (kits.size() != 0) {
+            Gson gson = new Gson();
+            String json = gson.toJson(kits);
+            Map<String, String> params = new HashMap<>();
+            params.put("json", json);
+            new VolleyPost(this, this, util.ServerUrl + "SaveLatLng", params).post();
+        }
     }
 
     @Override

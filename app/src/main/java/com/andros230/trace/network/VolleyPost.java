@@ -30,7 +30,8 @@ public class VolleyPost {
 
     public void post() {
         RequestQueue requestQueue = Volley.newRequestQueue(context);
-        final StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+
+         StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 // 返回数据

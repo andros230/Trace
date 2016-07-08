@@ -1,4 +1,4 @@
-package com.andros230.trace;
+package com.andros230.trace.activity;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -6,6 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import com.andros230.trace.R;
 
 import java.util.List;
 import java.util.Map;

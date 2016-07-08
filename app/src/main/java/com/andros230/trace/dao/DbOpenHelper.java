@@ -67,6 +67,7 @@ public class DbOpenHelper extends SQLiteOpenHelper {
         Logs.d("changeStatus", "已上传" + rs + "条数据");
     }
 
+
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
     }
