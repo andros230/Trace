@@ -7,13 +7,13 @@ public class Logs {
 
     public static void d(String TAG, String str) {
         if (OPENDEBUG) {
-            Log.d("-= " + TAG, str);
+            Log.d("-= " + TAG, str + "");
         }
     }
 
     public static void e(String TAG, String str) {
         if (OPENDEBUG) {
-            Log.e("-= " + TAG, str);
+            Log.e("-= " + TAG, str + "");
         }
     }
 

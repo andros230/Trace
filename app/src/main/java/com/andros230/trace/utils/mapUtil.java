@@ -11,7 +11,10 @@ import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.PolylineOptions;
 import com.andros230.trace.R;
+import com.andros230.trace.bean.LatLngKit;
 import com.andros230.trace.dao.DbOpenHelper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,24 +22,18 @@ import java.util.List;
 public class MapUtil {
     private AMap aMap;
     private DbOpenHelper db;
-    private String day;
     ProgressDialog dialog;
     private Context context;
-    private boolean bool;
     public static List<PolylineOptions> lineList = null;
+    private String TAG = "MapUtil";
 
-    public MapUtil(Context context, AMap aMap, boolean bool) {
+    public MapUtil(Context context, AMap aMap) {
         this.context = context;
         this.aMap = aMap;
-        this.bool = bool;
     }
 
-    public void ShowTraceThread(DbOpenHelper db, String day) {
-        if (bool) {
-            dialog = ProgressDialog.show(context, "加载路线中", "加载中,请稍后...", false);
-        }
+    public void ShowTraceThread(DbOpenHelper db) {
         this.db = db;
-        this.day = day;
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -46,7 +43,7 @@ public class MapUtil {
     }
 
     private void ShowTrace() {
-        Cursor cur = db.query(day);
+        Cursor cur = db.query();
         String time2 = null;
         List<PolylineOptions> list = new ArrayList();
         PolylineOptions polylineOptions = new PolylineOptions();
@@ -57,12 +54,12 @@ public class MapUtil {
         while (cur.moveToNext()) {
             lat = cur.getDouble(1);
             lng = cur.getDouble(2);
-            String date = cur.getString(3);
             String time = cur.getString(4);
-            if (util.compareTime(time2, date + " " + time)) {
+            if (util.compareTime(time2, time)) {
                 polylineOptions.add(new LatLng(lat, lng));
-                time2 = date + " " + time;
+                time2 = time;
             } else {
+                Logs.d(TAG, "ShowTrace  new  PolylineOptions");
                 list.add(polylineOptions);
                 polylineOptions = new PolylineOptions();
                 polylineOptions.width(20);
@@ -70,9 +67,52 @@ public class MapUtil {
                 time2 = null;
             }
         }
-        if (bool) {
-            aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 15));
+        aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 15));
+        list.add(polylineOptions);
+        lineList = list;
+        drawLine(list);
+    }
+
+
+    public void showHistoryTraceThread(final String json) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                showHistoryTrace(json);
+            }
+        }).start();
+    }
+
+    public void showHistoryTrace(String json) {
+        String time2 = null;
+        List<PolylineOptions> list = new ArrayList();
+        PolylineOptions polylineOptions = new PolylineOptions();
+        polylineOptions.width(20);
+        polylineOptions.setCustomTexture(BitmapDescriptorFactory.fromResource(R.drawable.map_alr));
+        double lat = 0;
+        double lng = 0;
+        Gson gson = new Gson();
+        List<LatLngKit> kits = gson.fromJson(json, new TypeToken<List<LatLngKit>>() {
+        }.getType());
+        for (LatLngKit kit : kits) {
+            String time = kit.getTime();
+            lat = Double.valueOf(kit.getLat());
+
+            lng = Double.valueOf(kit.getLng());
+            if (util.compareTime(time2, time)) {
+                polylineOptions.add(new LatLng(lat, lng));
+                time2 = time;
+            } else {
+                Logs.d(TAG, "ShowHistoryTrace  new  PolylineOptions");
+                list.add(polylineOptions);
+                polylineOptions = new PolylineOptions();
+                polylineOptions.width(20);
+                polylineOptions.setCustomTexture(BitmapDescriptorFactory.fromResource(R.drawable.map_alr));
+                time2 = null;
+            }
         }
+
+        aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 15));
         list.add(polylineOptions);
         lineList = list;
         drawLine(list);
@@ -81,10 +121,8 @@ public class MapUtil {
     public void drawLine(List<PolylineOptions> list) {
         aMap.clear(true);
         for (int i = 0; i < list.size(); i++) {
+            Logs.d(TAG, "---drawLine");
             aMap.addPolyline(list.get(i));
-        }
-        if (bool) {
-            dialog.dismiss();
         }
     }
 

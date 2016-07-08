@@ -1,7 +1,6 @@
 package com.andros230.trace;
 
 import android.app.Activity;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -10,16 +9,25 @@ import android.widget.Spinner;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.AMapOptions;
 import com.amap.api.maps.MapView;
-import com.andros230.trace.dao.DbOpenHelper;
+import com.andros230.trace.network.VolleyCallBack;
+import com.andros230.trace.network.VolleyCallBack2;
+import com.andros230.trace.network.VolleyPost;
+import com.andros230.trace.network.VolleyPost2;
+import com.andros230.trace.utils.Logs;
 import com.andros230.trace.utils.MapUtil;
+import com.andros230.trace.utils.util;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class History extends Activity {
+public class History extends Activity implements VolleyCallBack, VolleyCallBack2 {
     private MapView mMapView;
     private AMap aMap;
-    private DbOpenHelper db;
+    private Spinner spinner;
+    private String TAG = "History";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,32 +43,52 @@ public class History extends Activity {
             aMap = mMapView.getMap();
             aMap.getUiSettings().setLogoPosition(AMapOptions.LOGO_POSITION_BOTTOM_CENTER);
         }
-        db = new DbOpenHelper(this);
-        Spinner spinner = (Spinner) findViewById(R.id.history_spinner);
+        spinner = (Spinner) findViewById(R.id.history_spinner);
 
-        History_adapter adapter = new History_adapter(this, getData());
-        spinner.setAdapter(adapter);
+        Map<String, String> params = new HashMap<>();
+        params.put("uid", util.readUid(this));
+        new VolleyPost(this, this, util.ServerUrl + "History", params).post();
+
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                String day = (String) adapterView.getItemAtPosition(i);
-                new MapUtil(History.this, aMap, true).ShowTraceThread(db, day);
+                String date = (String) adapterView.getItemAtPosition(i);
+                Logs.d(TAG, date + "aa230");
+                Map<String, String> params = new HashMap<>();
+                params.put("uid", util.readUid(History.this));
+                params.put("date", date);
+                new VolleyPost2(History.this, History.this, util.ServerUrl + "HistoryTrace", params).post();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
+
     }
 
-    public List<String> getData() {
-        DbOpenHelper db = new DbOpenHelper(this);
-        Cursor cur = db.queryHistory();
-        List<String> data = new ArrayList<>();
-        while (cur.moveToNext()) {
-            data.add(cur.getString(0));
+    @Override
+    public void volleySolve(String result) {
+        if (result != null) {
+            Gson gson = new Gson();
+            List<Map<String, Object>> list = gson.fromJson(result, new TypeToken<List<Map<String, Object>>>() {
+            }.getType());
+            History_adapter adapter = new History_adapter(this, list);
+            spinner.setAdapter(adapter);
+        } else {
+            Logs.e(TAG, "网络异常");
         }
-        return data;
+
+    }
+
+    @Override
+    public void volleySolve2(String result) {
+        Logs.d(TAG, result);
+        if (result != null) {
+            new MapUtil(this, aMap).showHistoryTraceThread(result);
+        } else {
+            Logs.e(TAG, "网络异常");
+        }
     }
 
 
@@ -87,6 +115,4 @@ public class History extends Activity {
         super.onSaveInstanceState(outState);
         mMapView.onSaveInstanceState(outState);
     }
-
-
 }

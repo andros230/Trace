@@ -8,14 +8,17 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
 public class util {
+    public static final String ServerUrl = "http://192.168.0.104:8080/Trace/";
     private static final String PREFERENCES_NAME = "com_andros230_tableName";
-    public static String macClassName;
+    private static String TAG = "util";
 
     public static String getNowTime(boolean bool) {
         try {
@@ -40,11 +43,12 @@ public class util {
         }
         int min = 0;
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");    //设置时间格式
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");    //设置时间格式
             Date d1 = sdf.parse(time2);
             Date d2 = sdf.parse(time);
             long l = d1.getTime() - d2.getTime();
             min = (int) ((l / (60 * 1000)));//分
+            Logs.d(TAG, "compareTime:" + min + " time:" + time);
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -53,8 +57,47 @@ public class util {
             return false;
         } else {
             return true;
-
         }
+
+    }
+
+
+    public static String createMD5(Context context) {
+        String aa;
+        String time = util.getNowTime(false) + " " + util.getNowTime(true);
+        String mac = util.getMac(context);
+
+        if (mac != null) {
+            aa = MD5(mac + time);
+        } else {
+            aa = MD5((int) (Math.random() * 9999) + time);
+        }
+        return aa;
+    }
+
+
+    // MD5加密，16位
+    private static String MD5(String str) {
+        String result = "";
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(str.getBytes());
+            byte b[] = md.digest();
+            int i;
+            StringBuffer buf = new StringBuffer("");
+            for (int offset = 0; offset < b.length; offset++) {
+                i = b[offset];
+                if (i < 0)
+                    i += 256;
+                if (i < 16)
+                    buf.append("0");
+                buf.append(Integer.toHexString(i));
+            }
+            result = buf.toString().substring(8, 24);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
 
@@ -89,19 +132,26 @@ public class util {
         return accessibleProviders != null && accessibleProviders.size() > 0;
     }
 
-
-    public static void writeTableName(Context context, String tableName) {
+    //获取用户信息
+    public static void writeUser(Context context, String uid, String md5) {
         SharedPreferences pref = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_APPEND);
         SharedPreferences.Editor editor = pref.edit();
-        editor.putString("tableName", tableName);
+        editor.putString("uid", uid);
+        editor.putString("md5", md5);
         editor.commit();
     }
 
 
-    //读取数据库表名
-    public static String readTableName(Context context) {
+    //读取UID
+    public static String readUid(Context context) {
         SharedPreferences pref = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_APPEND);
-        String name = pref.getString("tableName", "");
-        return name;
+        String name = pref.getString("uid", "");
+        if (name.equals("")) {
+            return null;
+        } else {
+            return name;
+        }
     }
+
+
 }

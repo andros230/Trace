@@ -5,6 +5,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.View;
@@ -22,17 +23,20 @@ import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.PolylineOptions;
 import com.andros230.trace.bean.LatLngKit;
-import com.andros230.trace.bmob.BmobDao;
 import com.andros230.trace.dao.DbOpenHelper;
+import com.andros230.trace.network.VolleyCallBack;
+import com.andros230.trace.network.VolleyPost;
 import com.andros230.trace.utils.Logs;
 import com.andros230.trace.utils.MapUtil;
 import com.andros230.trace.utils.util;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-
-public class MainActivity extends Activity implements LocationSource, AMapLocationListener {
+public class MainActivity extends Activity implements LocationSource, AMapLocationListener, VolleyCallBack {
     private MapView mMapView;
     private AMap aMap;
 
@@ -47,7 +51,6 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
     private Chronometer chronometer;
     boolean bool = true;
     private List<LatLng> latLngList;
-    private BmobDao bmobDao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,11 +58,10 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         setContentView(R.layout.activity_main);
         mMapView = (MapView) findViewById(R.id.main_map);
         mMapView.onCreate(savedInstanceState);
-
         init();
         AlarmCPU();
+        updateDate();
     }
-
 
     public void History(View view) {
         Intent intent = new Intent();
@@ -76,7 +78,6 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         tv_status = (TextView) findViewById(R.id.tv_status);
         chronometer.start();
 
-
         if (aMap == null) {
             aMap = mMapView.getMap();
             aMap.setLocationSource(this);  //设置定位监听
@@ -87,7 +88,6 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
 
         db = new DbOpenHelper(this);
         latLngList = new ArrayList();
-        bmobDao = new BmobDao(db);
     }
 
 
@@ -116,8 +116,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
                     kit.setLng(lng + "");
                     kit.setDate(util.getNowTime(false));
                     kit.setTime(util.getNowTime(true));
-                    //保存到服务器
-                    bmobDao.save(kit);
+                    db.insert(kit);
                     //绘制路线
                     drawLine(kit);
                 }
@@ -140,11 +139,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         latLngList.add(new LatLng(Double.valueOf(kit.getLat()), Double.valueOf(kit.getLng())));
         if (bool) {
             if (lineBool) {
-                new MapUtil(this, aMap, false).ShowTraceThread(db, util.getNowTime(false));
-
-                kit.setMark(util.getNowTime(false));
-                bmobDao.checkMark(kit);
-
+                new MapUtil(this, aMap).ShowTraceThread(db);
                 lineBool = false;
             } else {
                 List<PolylineOptions> list = MapUtil.lineList;
@@ -186,7 +181,6 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
     public void deactivate() {
     }
 
-
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -212,14 +206,13 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
     @Override
     protected void onDestroy() {
         Logs.d(TAG, "onDestroy");
+        updateDate();
         super.onDestroy();
         mMapView.onDestroy();
         if (mLocationClient != null) {
             mLocationClient.onDestroy();
         }
-        bmobDao.updateData();
     }
-
 
     //alarmManager可叫醒CPU,保证关闭屏后还可定位
     public void AlarmCPU() {
@@ -229,5 +222,42 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         long intervalTime = 1000; // ms
         AlarmManager am = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
         am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerTime, intervalTime, sender);
+    }
+
+    public void updateDate() {
+        String uid = util.readUid(this);
+        Cursor cur = db.updateDataToServer();
+        List<LatLngKit> kits = new ArrayList<>();
+        while (cur.moveToNext()) {
+            String lat = cur.getString(1);
+            String lng = cur.getString(2);
+            String date = cur.getString(3);
+            String time = cur.getString(4);
+
+            LatLngKit kit = new LatLngKit();
+            kit.setLat(lat);
+            kit.setLng(lng);
+            kit.setDate(date);
+            kit.setTime(time);
+            kit.setUid(uid);
+            kits.add(kit);
+        }
+
+        Gson gson = new Gson();
+        String json = gson.toJson(kits);
+        Map<String, String> params = new HashMap<>();
+        params.put("json", json);
+        new VolleyPost(this, this, util.ServerUrl + "SaveLatLng", params).post();
+    }
+
+    @Override
+    public void volleySolve(String result) {
+        if (result != null) {
+            if (result.equals("YES")) {
+                db.changeStatus();
+            }
+        } else {
+            Logs.e(TAG, "网络异常,上传同步数据失败");
+        }
     }
 }
