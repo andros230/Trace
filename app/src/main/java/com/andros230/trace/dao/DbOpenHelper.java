@@ -16,6 +16,7 @@ import okhttp3.internal.Util;
 public class DbOpenHelper extends SQLiteOpenHelper {
     private String TAG = "DbOpenHelper";
     private static final String TABLE_NAME = "trace";
+    private final String table_sql = "CREATE TABLE " + TABLE_NAME + " (id INTEGER primary key autoincrement, lat text, lng text, date text,time text, status text);";
 
 
     public DbOpenHelper(Context context) {
@@ -24,9 +25,17 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        String sql = "CREATE TABLE " + TABLE_NAME + " (id INTEGER primary key autoincrement, lat text, lng text, date text,time text, status text);";
-        sqLiteDatabase.execSQL(sql);
+        sqLiteDatabase.execSQL(table_sql);
         Logs.d(TAG, "创建数据库");
+    }
+
+    public void dropTable() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Log.i(TAG, "删除数据库");
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+
+        db.execSQL(table_sql);
+        Log.i(TAG, "删除数据库后再新建");
     }
 
     //查询某天数据

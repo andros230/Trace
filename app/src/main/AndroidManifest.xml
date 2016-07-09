@@ -47,10 +47,22 @@
         <activity
             android:name=".activity.History"
             android:screenOrientation="portrait"/>
-
         <activity
             android:name=".activity.MainActivity"
             android:screenOrientation="portrait"/>
+
+        <activity
+            android:name=".activity.Login"
+            android:screenOrientation="portrait"/>
+
+        <!-- weibo -->
+        <activity
+            android:name="com.sina.weibo.sdk.component.WeiboSdkBrowser"
+            android:configChanges="keyboardHidden|orientation"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize">
+        </activity>
+
     </application>
 
 </manifest>

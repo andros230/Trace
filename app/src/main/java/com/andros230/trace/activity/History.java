@@ -75,6 +75,7 @@ public class History extends Activity implements VolleyCallBack, VolleyCallBack2
             }.getType());
             History_adapter adapter = new History_adapter(this, list);
             spinner.setAdapter(adapter);
+            spinner.setSelection(list.size() - 1, true);
         } else {
             Logs.e(TAG, "网络异常");
         }

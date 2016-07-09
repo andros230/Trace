@@ -94,10 +94,11 @@ public class MapUtil {
         Gson gson = new Gson();
         List<LatLngKit> kits = gson.fromJson(json, new TypeToken<List<LatLngKit>>() {
         }.getType());
-        for (LatLngKit kit : kits) {
+        for (int i = 0; i < kits.size() ; i++) {
+           LatLngKit kit = kits.get(i);
             String time = kit.getTime();
-            lat = Double.valueOf(kit.getLat());
 
+            lat = Double.valueOf(kit.getLat());
             lng = Double.valueOf(kit.getLng());
             if (util.compareTime(time2, time)) {
                 polylineOptions.add(new LatLng(lat, lng));

@@ -16,8 +16,9 @@ import java.util.Date;
 import java.util.List;
 
 public class util {
-    public static final String ServerUrl = "http://192.168.0.104:8080/Trace/";
-    private static final String PREFERENCES_NAME = "com_andros230_tableName";
+    public static final String ServerUrl = "http://192.168.18.105:8080/Trace/";
+    private static final String NAME_UID = "com_andros230_UID";
+    private static final String NAME_OPENID = "com_andros230_OPENID";
     private static String TAG = "util";
 
     public static String getNowTime(boolean bool) {
@@ -70,7 +71,7 @@ public class util {
         if (mac != null) {
             aa = MD5(mac + time);
         } else {
-            aa = MD5((int) (Math.random() * 9999) + time);
+            aa = MD5((int) (Math.random() * 999999) + time);
         }
         return aa;
     }
@@ -132,19 +133,18 @@ public class util {
         return accessibleProviders != null && accessibleProviders.size() > 0;
     }
 
-    //获取用户信息
-    public static void writeUser(Context context, String uid, String md5) {
-        SharedPreferences pref = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_APPEND);
+
+    //保存UID
+    public static void writeUid(Context context, String uid) {
+        SharedPreferences pref = context.getSharedPreferences(NAME_UID, Context.MODE_APPEND);
         SharedPreferences.Editor editor = pref.edit();
         editor.putString("uid", uid);
-        editor.putString("md5", md5);
         editor.commit();
     }
 
-
     //读取UID
     public static String readUid(Context context) {
-        SharedPreferences pref = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_APPEND);
+        SharedPreferences pref = context.getSharedPreferences(NAME_UID, Context.MODE_APPEND);
         String name = pref.getString("uid", "");
         if (name.equals("")) {
             return null;
@@ -153,5 +153,22 @@ public class util {
         }
     }
 
+    //获取openid
+    public static void writeOpenID(Context context, String openID) {
+        SharedPreferences pref = context.getSharedPreferences(NAME_OPENID, Context.MODE_APPEND);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("openID", openID);
+        editor.commit();
+    }
 
+    //读取openID
+    public static String readOpenID(Context context) {
+        SharedPreferences pref = context.getSharedPreferences(NAME_OPENID, Context.MODE_APPEND);
+        String name = pref.getString("openID", "");
+        if (name.equals("")) {
+            return null;
+        } else {
+            return name;
+        }
+    }
 }

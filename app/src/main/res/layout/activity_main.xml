@@ -27,17 +27,20 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="刷新: "/>
+                android:text="刷新: "
+                android:textSize="10dp"/>
 
             <Chronometer
                 android:id="@+id/chronometer"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:textSize="10dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="秒前"/>
+                android:text="秒前"
+                android:textSize="10dp"/>
 
         </LinearLayout>
 
@@ -49,12 +52,14 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="纬度: "/>
+                android:text="纬度: "
+                android:textSize="10dp"/>
 
             <TextView
                 android:id="@+id/lat"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:textSize="10dp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -65,12 +70,14 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="经度: "/>
+                android:text="经度: "
+                android:textSize="10dp"/>
 
             <TextView
                 android:id="@+id/lng"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:textSize="10dp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -81,17 +88,20 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="误差: "/>
+                android:text="误差: "
+                android:textSize="10dp"/>
 
             <TextView
                 android:id="@+id/accuracy"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:textSize="10dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="米"/>
+                android:text="米"
+                android:textSize="10dp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -102,27 +112,36 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="模式: "/>
-
-            <TextView
-                android:id="@+id/provider"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
+                android:text="状态: "
+                android:textSize="10dp"/>
 
             <TextView
                 android:id="@+id/tv_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#FF3030"/>
+                android:textSize="10dp"/>
 
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="模式: "
+                android:textSize="10dp"/>
+
+            <TextView
+                android:id="@+id/provider"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10dp"/>
+
+        </LinearLayout>
+
 
     </LinearLayout>
 

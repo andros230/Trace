@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.KeyEvent;
@@ -108,7 +109,8 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
 
                 if (bool) {
                     chronometer.setBase(SystemClock.elapsedRealtime());
-                    tv_status.setText("");
+                    tv_status.setTextColor(Color.DKGRAY);
+                    tv_status.setText("正常");
                     tv_lat.setText(lat + "");
                     tv_lng.setText(lng + "");
                     tv_accuracy.setText(aMapLocation.getAccuracy() + "");
@@ -133,7 +135,8 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
                 }
 
             } else {
-                tv_status.setText("定位失败," + aMapLocation.getErrorInfo());
+                tv_status.setTextColor(Color.RED);
+                tv_status.setText("异常");
                 Logs.e(TAG, "定位失败,错误代码;" + aMapLocation.getErrorCode() + ",错误信息:" + aMapLocation.getErrorInfo());
             }
         }

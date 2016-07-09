@@ -24,10 +24,9 @@ public class Splash extends Activity implements VolleyCallBack {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
         Logs.OPENDEBUG = true;
+
         registerUser();
-
     }
-
 
     public void registerUser() {
         String uid = util.readUid(this);
@@ -39,6 +38,7 @@ public class Splash extends Activity implements VolleyCallBack {
             new VolleyPost(this, this, util.ServerUrl + "newUser", params).post();
         } else {
             Logs.d(TAG, "已注册用户");
+
             Handler x = new Handler();
             x.postDelayed(new splashHandler(), 1000);
         }
@@ -48,10 +48,9 @@ public class Splash extends Activity implements VolleyCallBack {
     public void volleySolve(String result) {
         if (result != null) {
             Logs.d(TAG, "uid: " + result);
-            util.writeUser(this, result, md5);
-
+            util.writeUid(this, result);
             Handler x = new Handler();
-            x.postDelayed(new splashHandler(), 1000);
+            x.postDelayed(new splashHandler(), 100);
         } else {
             Toast.makeText(this, "网络异常,请检查网络", Toast.LENGTH_LONG).show();
         }
@@ -59,8 +58,16 @@ public class Splash extends Activity implements VolleyCallBack {
 
     class splashHandler implements Runnable {
         public void run() {
-            startActivity(new Intent(getApplication(), MainActivity.class));
-            Splash.this.finish();
+            String openID = util.readOpenID(getApplicationContext());
+            if (openID == null) {
+                Logs.d(TAG, "openID is null");
+                startActivity(new Intent(getApplication(), Login.class));
+                Splash.this.finish();
+            } else {
+                Logs.d(TAG, "openID:" + openID);
+                startActivity(new Intent(getApplication(), MainActivity.class));
+                Splash.this.finish();
+            }
         }
     }
 
