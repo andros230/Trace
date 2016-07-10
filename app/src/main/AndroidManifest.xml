@@ -46,13 +46,16 @@
 
         <activity
             android:name=".activity.History"
+            android:exported="false"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".activity.MainActivity"
+            android:exported="false"
             android:screenOrientation="portrait"/>
 
         <activity
             android:name=".activity.Login"
+            android:exported="false"
             android:screenOrientation="portrait"/>
 
         <!-- weibo -->

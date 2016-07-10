@@ -10,10 +10,10 @@
         android:id="@+id/weibo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="weibo_Button"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="52dp"
+        android:onClick="weibo_Button"
         android:text="微博"/>
 
     <Button
@@ -31,4 +31,8 @@
         android:layout_centerVertical="true"
         android:onClick="experience"
         android:text="先体验一下"/>
+
+
+
+
 </RelativeLayout>

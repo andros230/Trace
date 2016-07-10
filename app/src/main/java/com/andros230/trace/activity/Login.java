@@ -3,13 +3,16 @@ package com.andros230.trace.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Toast;
 
 import com.andros230.trace.R;
 import com.andros230.trace.dao.DbOpenHelper;
 import com.andros230.trace.network.VolleyCallBack;
+import com.andros230.trace.network.VolleyCallBack2;
 import com.andros230.trace.network.VolleyPost;
+import com.andros230.trace.network.VolleyPost2;
 import com.andros230.trace.utils.Logs;
 import com.andros230.trace.utils.util;
 import com.sina.weibo.sdk.auth.AuthInfo;
@@ -22,8 +25,11 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Login extends Activity implements VolleyCallBack {
+public class Login extends Activity implements VolleyCallBack,VolleyCallBack2{
     private String TAG = "Login";
+
+
+
     private String APP_KEY = "305471104";
     private String REDIRECT_URL = "http://www.sina.com";
     private String SCOPE = "email,direct_messages_read,direct_messages_write,"
@@ -37,6 +43,21 @@ public class Login extends Activity implements VolleyCallBack {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        registerUser();
+    }
+
+    public void registerUser() {
+        String uid = util.readUid(this);
+        if (uid == null) {
+            Logs.d(TAG, "新用户");
+            String md5 = util.createMD5(this);
+            Map<String, String> params = new HashMap<>();
+            params.put("md5", md5);
+            new VolleyPost2(this, this, util.ServerUrl + "newUser", params).post();
+        } else {
+            Logs.d(TAG, "已注册用户");
+        }
     }
 
 
@@ -73,6 +94,17 @@ public class Login extends Activity implements VolleyCallBack {
 
         } else {
             Logs.e(TAG, "网络异常, saveOpenID 上传失败");
+        }
+    }
+
+    //volley请求回调2
+    @Override
+    public void volleySolve2(String result) {
+        if (result != null) {
+            Logs.d(TAG, "uid: " + result);
+            util.writeUid(this, result);
+        } else {
+            Toast.makeText(this, "网络异常,请检查网络", Toast.LENGTH_LONG).show();
         }
     }
 

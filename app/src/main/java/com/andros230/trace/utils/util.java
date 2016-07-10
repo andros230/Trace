@@ -153,6 +153,16 @@ public class util {
         }
     }
 
+    //清除UID
+    public static void clearUid(Context context){
+        SharedPreferences pref = context.getSharedPreferences(NAME_UID, Context.MODE_APPEND);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        editor.commit();
+    }
+
+
+
     //获取openid
     public static void writeOpenID(Context context, String openID) {
         SharedPreferences pref = context.getSharedPreferences(NAME_OPENID, Context.MODE_APPEND);
@@ -170,5 +180,13 @@ public class util {
         } else {
             return name;
         }
+    }
+
+    //清除openID
+    public static void clearOpenID(Context context){
+        SharedPreferences pref = context.getSharedPreferences(NAME_OPENID, Context.MODE_APPEND);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        editor.commit();
     }
 }

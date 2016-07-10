@@ -7,11 +7,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Chronometer;
+import android.widget.FrameLayout;
+import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +41,7 @@ import com.andros230.trace.R;
 import com.andros230.trace.bean.LatLngKit;
 import com.andros230.trace.dao.DbOpenHelper;
 import com.andros230.trace.network.VolleyCallBack;
+import com.andros230.trace.network.VolleyCallBack2;
 import com.andros230.trace.network.VolleyPost;
 import com.andros230.trace.utils.Logs;
 import com.andros230.trace.utils.MapUtil;
@@ -41,7 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends Activity implements LocationSource, AMapLocationListener, VolleyCallBack {
+public class MainActivity extends Activity implements LocationSource, AMapLocationListener, VolleyCallBack, VolleyCallBack2 {
     private MapView mMapView;
     private AMap aMap;
 
@@ -56,6 +68,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
     private Chronometer chronometer;
     boolean bool = true;
     private List<LatLng> latLngList;
+    private PopupWindow mPopWindow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,9 +81,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
     }
 
     public void History(View view) {
-        Intent intent = new Intent();
-        intent.setClass(this, History.class);
-        startActivity(intent);
+        showPopupWindow();
     }
 
     private void init() {
@@ -292,5 +303,69 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         } else {
             Logs.e(TAG, "网络异常,上传同步数据失败");
         }
+    }
+
+    @Override
+    public void volleySolve2(String result) {
+
+    }
+
+
+    private void showPopupWindow() {
+        //设置contentView
+        View contentView = LayoutInflater.from(MainActivity.this).inflate(R.layout.popup_layout, null);
+        mPopWindow = new PopupWindow(contentView);
+        mPopWindow.setFocusable(true);
+
+
+        ListView list = (ListView) contentView.findViewById(R.id.listView);
+        popup_adapter adapter = new popup_adapter(this, getdata());
+        list.setAdapter(adapter);
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Log.i("----", getdata().get(i));
+                if (getdata().get(i).equals("历史足迹")) {
+                    Intent intent = new Intent();
+                    intent.setClass(MainActivity.this, History.class);
+                    startActivity(intent);
+                    mPopWindow.dismiss();
+                } else if (getdata().get(i).equals("退出帐号")) {
+                    new DbOpenHelper(getApplicationContext()).dropTable();
+                    util.clearUid(getApplicationContext());
+                    util.clearOpenID(getApplicationContext());
+                    mPopWindow.dismiss();
+                    Intent intent = new Intent();
+                    intent.setClass(MainActivity.this, Login.class);
+                    startActivity(intent);
+                    MainActivity.this.finish();
+                }
+            }
+        });
+
+        list.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        mPopWindow.setWidth(list.getMeasuredWidth());
+        mPopWindow.setHeight((ViewGroup.LayoutParams.WRAP_CONTENT));
+        mPopWindow.setOutsideTouchable(true);
+        mPopWindow.setBackgroundDrawable(new ColorDrawable(0));
+
+        mPopWindow.setContentView(contentView);
+        //显示PopupWindow
+        View rootview = LayoutInflater.from(MainActivity.this).inflate(R.layout.activity_main, null);
+        mPopWindow.showAtLocation(rootview, Gravity.CENTER, 0, 0);
+
+
+    }
+
+    public List<String> getdata() {
+        List<String> data = new ArrayList<>();
+        data.add("历史足迹");
+       String openID =  util.readOpenID(getApplicationContext());
+        if (openID != null) {
+            data.add("退出帐号");
+        }
+        data.add("测试数据");
+        data.add("测试数据");
+        return data;
     }
 }

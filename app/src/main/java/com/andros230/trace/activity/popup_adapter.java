@@ -1,5 +1,4 @@
 package com.andros230.trace.activity;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,15 +9,15 @@ import android.widget.TextView;
 import com.andros230.trace.R;
 
 import java.util.List;
-import java.util.Map;
 
-public class History_adapter extends BaseAdapter {
-    List<Map<String, Object>> list;
+
+public class popup_adapter extends BaseAdapter {
+    private Context context;
+    private List<String> list;
     private LayoutInflater mInflater;
-
-    public History_adapter(Context context, List<Map<String, Object>> list) {
-        this.mInflater = LayoutInflater.from(context);
+    public popup_adapter( Context context,List<String> list) {
         this.list = list;
+        this.mInflater = LayoutInflater.from(context);
     }
 
     @Override
@@ -28,7 +27,7 @@ public class History_adapter extends BaseAdapter {
 
     @Override
     public Object getItem(int i) {
-        return list.get(i).get("date");
+        return list.get(i);
     }
 
     @Override
@@ -41,17 +40,17 @@ public class History_adapter extends BaseAdapter {
         ViewHolder holder = null;
         if (holder == null) {
             holder = new ViewHolder();
-            view = mInflater.inflate(R.layout.history_spinner_item, null);
-            holder.day = (TextView) view.findViewById(R.id.history_item_day);
+            view = mInflater.inflate(R.layout.popup_item, null);
+            holder.popup_tv = (TextView) view.findViewById(R.id.popup_item_tv);
             view.setTag(holder);
         } else {
             holder = (ViewHolder) view.getTag();
         }
-        holder.day.setText((String) list.get(i).get("date"));
+        holder.popup_tv.setText(list.get(i));
         return view;
     }
 
     public class ViewHolder {
-        private TextView day;
+        private TextView popup_tv;
     }
 }
