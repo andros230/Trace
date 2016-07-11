@@ -52,7 +52,6 @@
             android:name=".activity.MainActivity"
             android:exported="false"
             android:screenOrientation="portrait"/>
-
         <activity
             android:name=".activity.Login"
             android:exported="false"
@@ -65,7 +64,8 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize">
         </activity>
-
+        <activity android:name=".activity.Feedback">
+        </activity>
     </application>
 
 </manifest>

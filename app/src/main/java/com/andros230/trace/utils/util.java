@@ -8,6 +8,8 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
+import com.andros230.trace.dao.DbOpenHelper;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -19,6 +21,7 @@ public class util {
     public static final String ServerUrl = "http://192.168.18.105:8080/Trace/";
     private static final String NAME_UID = "com_andros230_UID";
     private static final String NAME_OPENID = "com_andros230_OPENID";
+    private static final String NAME_MD5 = "com_andros230_MD4";
     private static String TAG = "util";
 
     public static String getNowTime(boolean bool) {
@@ -154,13 +157,12 @@ public class util {
     }
 
     //清除UID
-    public static void clearUid(Context context){
+    public static void clearUid(Context context) {
         SharedPreferences pref = context.getSharedPreferences(NAME_UID, Context.MODE_APPEND);
         SharedPreferences.Editor editor = pref.edit();
         editor.clear();
         editor.commit();
     }
-
 
 
     //获取openid
@@ -183,10 +185,46 @@ public class util {
     }
 
     //清除openID
-    public static void clearOpenID(Context context){
+    public static void clearOpenID(Context context) {
         SharedPreferences pref = context.getSharedPreferences(NAME_OPENID, Context.MODE_APPEND);
         SharedPreferences.Editor editor = pref.edit();
         editor.clear();
         editor.commit();
+    }
+
+
+    //保存MD5
+    public static void writeMD5(Context context, String uid) {
+        SharedPreferences pref = context.getSharedPreferences(NAME_MD5, Context.MODE_APPEND);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("md5", uid);
+        editor.commit();
+    }
+
+    //读取MD5
+    public static String readMD5(Context context) {
+        SharedPreferences pref = context.getSharedPreferences(NAME_MD5, Context.MODE_APPEND);
+        String name = pref.getString("md5", "");
+        if (name.equals("")) {
+            return null;
+        } else {
+            return name;
+        }
+    }
+
+    //清除MD5
+    public static void clearMD5(Context context) {
+        SharedPreferences pref = context.getSharedPreferences(NAME_MD5, Context.MODE_APPEND);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        editor.commit();
+    }
+
+
+    public static void Logout(Context context) {
+        new DbOpenHelper(context).dropTable();
+        util.clearUid(context);
+        util.clearOpenID(context);
+        util.clearMD5(context);
     }
 }

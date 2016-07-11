@@ -139,18 +139,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="10dp"/>
-
         </LinearLayout>
 
-
     </LinearLayout>
+
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/bg"
+        android:textColor="@android:color/background_light"
+        android:onClick="History"
+        android:text="菜单"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:onClick="History"
-        android:text="History"/>
+        android:layout_alignParentStart="true"/>
+
+
 </RelativeLayout>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.andros230.trace.activity.Feedback">
+
+    <EditText
+        android:id="@+id/feedback_content"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/frame"
+        android:hint="请填写具体内容帮助我们了解您的意见和建议(如可以请留下QQ或邮箱方便我们联系您)"
+
+        />
+
+    <Button
+        android:id="@+id/feedback_send"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/feedback_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:onClick="send"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg"
+        android:text="提交"
+        android:textColor="@android:color/background_light"/>
+</RelativeLayout>

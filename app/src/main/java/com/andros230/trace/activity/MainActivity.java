@@ -2,8 +2,10 @@ package com.andros230.trace.activity;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -135,7 +137,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
                         kit.setLng(lng + "");
                         kit.setDate(util.getNowTime(false));
                         kit.setTime(util.getNowTime(true));
-                        db.insert(kit);
+                        db.saveLatLng(kit);
                         //绘制路线
                         drawLine(kit);
                     }
@@ -284,7 +286,6 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
             kits.add(kit);
         }
 
-        Logs.d(TAG, kits.size() + "");
         if (kits.size() != 0) {
             Gson gson = new Gson();
             String json = gson.toJson(kits);
@@ -304,6 +305,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
             Logs.e(TAG, "网络异常,上传同步数据失败");
         }
     }
+
 
     @Override
     public void volleySolve2(String result) {
@@ -325,20 +327,18 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Log.i("----", getdata().get(i));
+                mPopWindow.dismiss();
                 if (getdata().get(i).equals("历史足迹")) {
                     Intent intent = new Intent();
                     intent.setClass(MainActivity.this, History.class);
                     startActivity(intent);
-                    mPopWindow.dismiss();
                 } else if (getdata().get(i).equals("退出帐号")) {
-                    new DbOpenHelper(getApplicationContext()).dropTable();
-                    util.clearUid(getApplicationContext());
-                    util.clearOpenID(getApplicationContext());
                     mPopWindow.dismiss();
+                    dialog();
+                }else if (getdata().get(i).equals("意见反馈")) {
                     Intent intent = new Intent();
-                    intent.setClass(MainActivity.this, Login.class);
+                    intent.setClass(MainActivity.this, Feedback.class);
                     startActivity(intent);
-                    MainActivity.this.finish();
                 }
             }
         });
@@ -360,12 +360,39 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
     public List<String> getdata() {
         List<String> data = new ArrayList<>();
         data.add("历史足迹");
-       String openID =  util.readOpenID(getApplicationContext());
+        data.add("意见反馈");
+        String openID = util.readOpenID(getApplicationContext());
         if (openID != null) {
             data.add("退出帐号");
         }
-        data.add("测试数据");
-        data.add("测试数据");
         return data;
+    }
+
+    protected void dialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setMessage("确定退出当前帐号？");
+
+        builder.setTitle("退出帐号");
+
+        builder.setPositiveButton("退出", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                util.Logout(getApplicationContext());
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this, Login.class);
+                startActivity(intent);
+                MainActivity.this.finish();
+            }
+        });
+
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.create().show();
     }
 }

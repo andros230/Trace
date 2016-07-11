@@ -25,9 +25,8 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Login extends Activity implements VolleyCallBack,VolleyCallBack2{
+public class Login extends Activity implements VolleyCallBack, VolleyCallBack2 {
     private String TAG = "Login";
-
 
 
     private String APP_KEY = "305471104";
@@ -52,6 +51,7 @@ public class Login extends Activity implements VolleyCallBack,VolleyCallBack2{
         if (uid == null) {
             Logs.d(TAG, "新用户");
             String md5 = util.createMD5(this);
+            util.writeMD5(this, md5);
             Map<String, String> params = new HashMap<>();
             params.put("md5", md5);
             new VolleyPost2(this, this, util.ServerUrl + "newUser", params).post();
@@ -132,6 +132,8 @@ public class Login extends Activity implements VolleyCallBack,VolleyCallBack2{
                 params.put("openID", openID);
                 String uid = util.readUid(Login.this);
                 params.put("uid", uid);
+                String md5 = util.readMD5(Login.this);
+                params.put("md5", md5);
                 new VolleyPost(Login.this, Login.this, util.ServerUrl + "SaveOpenID", params).post();
 
                 Logs.d("openID:", openID);
