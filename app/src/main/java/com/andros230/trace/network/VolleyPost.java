@@ -9,41 +9,31 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.andros230.trace.utils.Logs;
 
 import java.util.Map;
 
 public class VolleyPost {
     private String TAG = "VolleyPost";
-    private Context context;
-    private VolleyCallBack callBack;
-    private Map<String, String> params;
-    private String url;
 
     //Map<String, String> params = new HashMap<>();
     //params.put("way", "way");
-    public VolleyPost(Context context, VolleyCallBack callBack,String url ,Map<String, String> params) {
-        this.context = context;
-        this.callBack = callBack;
-        this.params = params;
-        this.url = url;
-    }
-
-    public void post() {
+    public VolleyPost(Context context, String url, final Map<String, String> params, final VolleyCallBack callBack) {
         RequestQueue requestQueue = Volley.newRequestQueue(context);
-
-         StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+        StringRequest postRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 // 返回数据
                 Log.i(TAG, response);
-                callBack.volleySolve(response);
+                callBack.volleyResult(response);
 
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.e(TAG, error.toString());
-                callBack.volleySolve(null);
+                Logs.e(TAG, error.toString());
+                callBack.volleyResult(null);
             }
         }) {
             @Override
@@ -54,3 +44,6 @@ public class VolleyPost {
         requestQueue.add(postRequest);
     }
 }
+
+
+

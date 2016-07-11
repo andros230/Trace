@@ -15,7 +15,7 @@ import com.andros230.trace.utils.util;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Splash extends Activity implements VolleyCallBack {
+public class Splash extends Activity {
     private String TAG = "Splash";
 
 
@@ -28,31 +28,32 @@ public class Splash extends Activity implements VolleyCallBack {
 
         String openID = util.readOpenID(this);
         if (openID != null) {
+
             Map<String, String> params = new HashMap<>();
             params.put("openID", openID);
             String md5 = util.readMD5(this);
             params.put("md5", md5);
-            new VolleyPost(Splash.this, Splash.this, util.ServerUrl + "UserCheck", params).post();
-        }else{
-            Handler x = new Handler();
-            x.postDelayed(new splashHandler(), 100);
-        }
-    }
+            new VolleyPost(this, util.ServerUrl + "UserCheck", params, new VolleyCallBack() {
+                @Override
+                public void volleyResult(String result) {
+                    if (result != null) {
+                        if (result.equals("NO")) {
+                            Logs.d(TAG, "帐号最后登录设备不是本设备，需重新登录");
+                            util.Logout(getApplicationContext());
+                        }
+                        Handler x = new Handler();
+                        x.postDelayed(new splashHandler(), 100);
+                    } else {
+                        Toast.makeText(getApplicationContext(), "网络异常,请检查网络", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
 
-    @Override
-    public void volleySolve(String result) {
-        if (result != null) {
-            if (result.equals("NO")) {
-                Logs.d(TAG, "帐号最后登录设备不是本设备，需重新登录");
-                util.Logout(this);
-            }
-            Handler x = new Handler();
-            x.postDelayed(new splashHandler(), 100);
         } else {
-            Toast.makeText(this, "网络异常,请检查网络", Toast.LENGTH_LONG).show();
+            Handler x = new Handler();
+            x.postDelayed(new splashHandler(), 100);
         }
     }
-
 
     class splashHandler implements Runnable {
         public void run() {

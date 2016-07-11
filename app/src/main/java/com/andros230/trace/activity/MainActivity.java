@@ -9,7 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -20,9 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Chronometer;
-import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -43,7 +40,6 @@ import com.andros230.trace.R;
 import com.andros230.trace.bean.LatLngKit;
 import com.andros230.trace.dao.DbOpenHelper;
 import com.andros230.trace.network.VolleyCallBack;
-import com.andros230.trace.network.VolleyCallBack2;
 import com.andros230.trace.network.VolleyPost;
 import com.andros230.trace.utils.Logs;
 import com.andros230.trace.utils.MapUtil;
@@ -55,7 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends Activity implements LocationSource, AMapLocationListener, VolleyCallBack, VolleyCallBack2 {
+public class MainActivity extends Activity implements LocationSource, AMapLocationListener {
     private MapView mMapView;
     private AMap aMap;
 
@@ -123,15 +119,16 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
                 if (bool) {
                     chronometer.setBase(SystemClock.elapsedRealtime());
                     tv_status.setTextColor(Color.DKGRAY);
-                    tv_status.setText("正常");
+                    tv_status.setText("记录轨迹中");
                     tv_lat.setText(lat + "");
                     tv_lng.setText(lng + "");
-                    tv_accuracy.setText(aMapLocation.getAccuracy() + "");
+                    tv_accuracy.setText(aMapLocation.getAccuracy() + "米");
                     tv_provider.setText(aMapLocation.getProvider());
                 }
 
-                if (temp_lat != lat && temp_lng != lng) {
-                    if (aMapLocation.getAccuracy() < 50) {
+
+                if (aMapLocation.getAccuracy() < 50) {
+                    if (temp_lat != lat && temp_lng != lng) {
                         LatLngKit kit = new LatLngKit();
                         kit.setLat(lat + "");
                         kit.setLng(lng + "");
@@ -140,16 +137,21 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
                         db.saveLatLng(kit);
                         //绘制路线
                         drawLine(kit);
+                        temp_lat = lat;
+                        temp_lng = lng;
+                    } else {
+                        Logs.d(TAG, "坐标没变动");
                     }
-                    temp_lat = lat;
-                    temp_lng = lng;
+
                 } else {
-                    Logs.d(TAG, "坐标没变动");
+                    tv_status.setTextColor(Color.RED);
+                    tv_status.setText("定位误差过大");
                 }
+
 
             } else {
                 tv_status.setTextColor(Color.RED);
-                tv_status.setText("异常");
+                tv_status.setText("定位失败");
                 Logs.e(TAG, "定位失败,错误代码;" + aMapLocation.getErrorCode() + ",错误信息:" + aMapLocation.getErrorInfo());
             }
         }
@@ -291,25 +293,22 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
             String json = gson.toJson(kits);
             Map<String, String> params = new HashMap<>();
             params.put("json", json);
-            new VolleyPost(this, this, util.ServerUrl + "SaveLatLng", params).post();
+            new VolleyPost(this, util.ServerUrl + "SaveLatLng", params, new VolleyCallBack() {
+                @Override
+                public void volleyResult(String result) {
+                    if (result != null) {
+
+                        if (result.equals("YES")) {
+                            db.changeStatus();
+                        }
+
+                    } else {
+                        Logs.e(TAG, "网络异常,上传同步数据失败");
+                    }
+                }
+            });
+
         }
-    }
-
-    @Override
-    public void volleySolve(String result) {
-        if (result != null) {
-            if (result.equals("YES")) {
-                db.changeStatus();
-            }
-        } else {
-            Logs.e(TAG, "网络异常,上传同步数据失败");
-        }
-    }
-
-
-    @Override
-    public void volleySolve2(String result) {
-
     }
 
 
@@ -328,14 +327,14 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Log.i("----", getdata().get(i));
                 mPopWindow.dismiss();
-                if (getdata().get(i).equals("历史足迹")) {
+                if (getdata().get(i).equals("历史轨迹")) {
                     Intent intent = new Intent();
                     intent.setClass(MainActivity.this, History.class);
                     startActivity(intent);
                 } else if (getdata().get(i).equals("退出帐号")) {
                     mPopWindow.dismiss();
                     dialog();
-                }else if (getdata().get(i).equals("意见反馈")) {
+                } else if (getdata().get(i).equals("意见反馈")) {
                     Intent intent = new Intent();
                     intent.setClass(MainActivity.this, Feedback.class);
                     startActivity(intent);
@@ -359,7 +358,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
 
     public List<String> getdata() {
         List<String> data = new ArrayList<>();
-        data.add("历史足迹");
+        data.add("历史轨迹");
         data.add("意见反馈");
         String openID = util.readOpenID(getApplicationContext());
         if (openID != null) {

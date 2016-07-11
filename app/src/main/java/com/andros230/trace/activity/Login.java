@@ -3,16 +3,14 @@ package com.andros230.trace.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.widget.Toast;
 
 import com.andros230.trace.R;
 import com.andros230.trace.dao.DbOpenHelper;
 import com.andros230.trace.network.VolleyCallBack;
-import com.andros230.trace.network.VolleyCallBack2;
 import com.andros230.trace.network.VolleyPost;
-import com.andros230.trace.network.VolleyPost2;
+import com.andros230.trace.utils.BaseUIListener;
 import com.andros230.trace.utils.Logs;
 import com.andros230.trace.utils.util;
 import com.sina.weibo.sdk.auth.AuthInfo;
@@ -20,15 +18,14 @@ import com.sina.weibo.sdk.auth.Oauth2AccessToken;
 import com.sina.weibo.sdk.auth.WeiboAuthListener;
 import com.sina.weibo.sdk.auth.sso.SsoHandler;
 import com.sina.weibo.sdk.exception.WeiboException;
+import com.tencent.tauth.Tencent;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Login extends Activity implements VolleyCallBack, VolleyCallBack2 {
+public class Login extends Activity {
     private String TAG = "Login";
-
-
     private String APP_KEY = "305471104";
     private String REDIRECT_URL = "http://www.sina.com";
     private String SCOPE = "email,direct_messages_read,direct_messages_write,"
@@ -42,8 +39,15 @@ public class Login extends Activity implements VolleyCallBack, VolleyCallBack2 {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
         registerUser();
+
+    }
+
+
+    public void close() {
+        finish();
+        System.exit(0);
+        Logs.d(TAG, "关闭登录页");
     }
 
     public void registerUser() {
@@ -54,7 +58,19 @@ public class Login extends Activity implements VolleyCallBack, VolleyCallBack2 {
             util.writeMD5(this, md5);
             Map<String, String> params = new HashMap<>();
             params.put("md5", md5);
-            new VolleyPost2(this, this, util.ServerUrl + "newUser", params).post();
+
+            new VolleyPost(this, util.ServerUrl + "newUser", params, new VolleyCallBack() {
+                @Override
+                public void volleyResult(String result) {
+                    if (result != null) {
+                        Logs.d(TAG, "uid: " + result);
+                        util.writeUid(getApplicationContext(), result);
+                    } else {
+                        Toast.makeText(getApplicationContext(), "网络异常,请检查网络", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+
         } else {
             Logs.d(TAG, "已注册用户");
         }
@@ -67,6 +83,14 @@ public class Login extends Activity implements VolleyCallBack, VolleyCallBack2 {
         mSsoHandler.authorize(new AuthListener());
     }
 
+    public void qq_button(View view) {
+
+        Tencent mTencent = Tencent.createInstance("222222", this.getApplicationContext());
+        if (!mTencent.isSessionValid()) {
+            mTencent.login(this, "all", new BaseUIListener(this));
+        }
+    }
+
 
     public void experience(View view) {
         Intent intent = new Intent();
@@ -75,43 +99,13 @@ public class Login extends Activity implements VolleyCallBack, VolleyCallBack2 {
         finish();
     }
 
-    //volley请求回调
-    @Override
-    public void volleySolve(String result) {
-        if (result != null) {
-            util.writeOpenID(Login.this, openID);
-            //保存UID
-            util.writeUid(this, result);
-            //删除旧数据
-            new DbOpenHelper(getApplicationContext()).dropTable();
-            Toast.makeText(Login.this, "登录成功", Toast.LENGTH_LONG).show();
-            Logs.d(TAG, "登录成功");
-
-            Intent intent = new Intent();
-            intent.setClass(this, MainActivity.class);
-            startActivity(intent);
-            finish();
-
-        } else {
-            Logs.e(TAG, "网络异常, saveOpenID 上传失败");
-        }
-    }
-
-    //volley请求回调2
-    @Override
-    public void volleySolve2(String result) {
-        if (result != null) {
-            Logs.d(TAG, "uid: " + result);
-            util.writeUid(this, result);
-        } else {
-            Toast.makeText(this, "网络异常,请检查网络", Toast.LENGTH_LONG).show();
-        }
-    }
-
     //以下为微博使用代码
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        //qq
+        Tencent.onActivityResultData(requestCode, resultCode, data, new BaseUIListener(this));
+        //weibo
         if (mSsoHandler != null) {
             mSsoHandler.authorizeCallBack(requestCode, resultCode, data);
         }
@@ -134,7 +128,32 @@ public class Login extends Activity implements VolleyCallBack, VolleyCallBack2 {
                 params.put("uid", uid);
                 String md5 = util.readMD5(Login.this);
                 params.put("md5", md5);
-                new VolleyPost(Login.this, Login.this, util.ServerUrl + "SaveOpenID", params).post();
+
+                new VolleyPost(getApplicationContext(), util.ServerUrl + "SaveOpenID", params, new VolleyCallBack() {
+                    @Override
+                    public void volleyResult(String result) {
+                        if (result != null) {
+                            util.writeOpenID(Login.this, openID);
+                            //保存UID
+                            util.writeUid(getApplicationContext(), result);
+                            //删除旧数据
+                            new DbOpenHelper(getApplicationContext()).dropTable();
+                            Toast.makeText(Login.this, "登录成功", Toast.LENGTH_LONG).show();
+                            Logs.d(TAG, "weibo登录成功");
+
+                            Intent intent = new Intent();
+                            intent.setClass(Login.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
+
+                        } else {
+                            Toast.makeText(getApplicationContext(), "网络异常,请检查网络", Toast.LENGTH_LONG).show();
+                            Logs.e(TAG, "网络异常, saveOpenID 上传失败");
+                        }
+
+                    }
+                });
+
 
                 Logs.d("openID:", openID);
                 String date = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new java.util.Date(mAccessToken.getExpiresTime()));
@@ -157,6 +176,7 @@ public class Login extends Activity implements VolleyCallBack, VolleyCallBack2 {
         public void onCancel() {
         }
     }
-
-
 }
+
+
+

@@ -15,7 +15,7 @@ import com.andros230.trace.utils.util;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Feedback extends Activity implements VolleyCallBack {
+public class Feedback extends Activity {
     private EditText content;
 
     @Override
@@ -36,20 +36,19 @@ public class Feedback extends Activity implements VolleyCallBack {
             params.put("content", str);
             String uid = util.readUid(this);
             params.put("uid", uid);
-            new VolleyPost(this, this, util.ServerUrl + "Feedback", params).post();
+            new VolleyPost(this, util.ServerUrl + "Feedback", params, new VolleyCallBack() {
+                @Override
+                public void volleyResult(String result) {
+                    if (result != null) {
+                        Toast.makeText(Feedback.this, "发送成功，感谢您的意见", Toast.LENGTH_LONG).show();
+                        content.setText("");
+                    } else {
+                        Toast.makeText(Feedback.this, "发送失败，请重新发送", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
         }
-
 
     }
 
-    @Override
-    public void volleySolve(String result) {
-        if (result != null) {
-            Toast.makeText(Feedback.this, "发送成功，感谢您的意见", Toast.LENGTH_LONG).show();
-            content.setText("");
-        } else {
-            Toast.makeText(Feedback.this, "发送失败，请重新发送", Toast.LENGTH_LONG).show();
-        }
-
-    }
 }

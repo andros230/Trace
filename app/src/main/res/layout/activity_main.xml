@@ -27,20 +27,40 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="状态: "
+                android:textSize="11dp"/>
+
+            <TextView
+                android:id="@+id/tv_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11dp"/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="刷新: "
-                android:textSize="10dp"/>
+                android:textSize="11dp"/>
 
             <Chronometer
                 android:id="@+id/chronometer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="10dp"/>
+                android:textSize="11dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="秒前"
-                android:textSize="10dp"/>
+                android:textSize="11dp"/>
 
         </LinearLayout>
 
@@ -53,13 +73,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="纬度: "
-                android:textSize="10dp"/>
+                android:textSize="11dp"/>
 
             <TextView
                 android:id="@+id/lat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="10dp"/>
+                android:textSize="11dp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -71,13 +91,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="经度: "
-                android:textSize="10dp"/>
+                android:textSize="11dp"/>
 
             <TextView
                 android:id="@+id/lng"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="10dp"/>
+                android:textSize="11dp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -89,39 +109,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="误差: "
-                android:textSize="10dp"/>
+                android:textSize="11dp"/>
 
             <TextView
                 android:id="@+id/accuracy"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="10dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="米"
-                android:textSize="10dp"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="状态: "
-                android:textSize="10dp"/>
-
-            <TextView
-                android:id="@+id/tv_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="10dp"/>
+                android:textSize="11dp"/>
 
         </LinearLayout>
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -132,13 +129,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="模式: "
-                android:textSize="10dp"/>
+                android:textSize="11dp"/>
 
             <TextView
                 android:id="@+id/provider"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="10dp"/>
+                android:textSize="11dp"/>
         </LinearLayout>
 
     </LinearLayout>
@@ -147,13 +144,13 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg"
-        android:textColor="@android:color/background_light"
-        android:onClick="History"
-        android:text="菜单"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"/>
+        android:layout_alignParentStart="true"
+        android:background="@drawable/bg"
+        android:onClick="History"
+        android:text="菜单"
+        android:textColor="@android:color/background_light"/>
 
 
 </RelativeLayout>

@@ -7,6 +7,9 @@
     android:layout_height="match_parent"
     tools:context="com.andros230.trace.activity.Login">
 
+
+
+
     <Button
         android:id="@+id/weibo"
         android:layout_width="match_parent"
@@ -27,6 +30,7 @@
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
         android:text="QQ帐号登录"
+        android:onClick="qq_button"
         android:textColor="@android:color/background_light"
         android:layout_marginTop="22dp"
         android:layout_below="@+id/weibo"
@@ -39,7 +43,7 @@
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
         android:onClick="experience"
-        android:text="      直接进入      "
+        android:text="直接进入"
         android:textColor="@android:color/background_light"
         android:layout_below="@+id/QQ"
         android:layout_centerHorizontal="true"

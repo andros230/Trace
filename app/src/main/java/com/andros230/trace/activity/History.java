@@ -1,21 +1,18 @@
 package com.andros230.trace.activity;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.AMapOptions;
 import com.amap.api.maps.MapView;
 import com.andros230.trace.R;
-import com.andros230.trace.dao.DbOpenHelper;
 import com.andros230.trace.network.VolleyCallBack;
-import com.andros230.trace.network.VolleyCallBack2;
 import com.andros230.trace.network.VolleyPost;
-import com.andros230.trace.network.VolleyPost2;
 import com.andros230.trace.utils.Logs;
 import com.andros230.trace.utils.MapUtil;
 import com.andros230.trace.utils.util;
@@ -26,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class History extends Activity implements VolleyCallBack, VolleyCallBack2 {
+public class History extends Activity {
     private MapView mMapView;
     private AMap aMap;
     private Spinner spinner;
@@ -50,7 +47,23 @@ public class History extends Activity implements VolleyCallBack, VolleyCallBack2
 
         Map<String, String> params = new HashMap<>();
         params.put("uid", util.readUid(this));
-        new VolleyPost(this, this, util.ServerUrl + "History", params).post();
+        new VolleyPost(this, util.ServerUrl + "History", params, new VolleyCallBack() {
+            @Override
+            public void volleyResult(String result) {
+                if (result != null) {
+                    Gson gson = new Gson();
+                    List<Map<String, Object>> list = gson.fromJson(result, new TypeToken<List<Map<String, Object>>>() {
+                    }.getType());
+                    History_adapter adapter = new History_adapter(getApplicationContext(), list);
+                    spinner.setAdapter(adapter);
+                    spinner.setSelection(list.size() - 1, true);
+                } else {
+                    Toast.makeText(getApplicationContext(), "网络异常,请检查网络", Toast.LENGTH_LONG).show();
+                    Logs.e(TAG, "网络异常");
+                }
+            }
+        });
+
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -59,7 +72,21 @@ public class History extends Activity implements VolleyCallBack, VolleyCallBack2
                 Map<String, String> params = new HashMap<>();
                 params.put("uid", util.readUid(History.this));
                 params.put("date", date);
-                new VolleyPost2(History.this, History.this, util.ServerUrl + "HistoryTrace", params).post();
+
+                new VolleyPost(getApplicationContext(), util.ServerUrl + "HistoryTrace", params, new VolleyCallBack() {
+                    @Override
+                    public void volleyResult(String result) {
+                        Logs.d(TAG, result);
+                        if (result != null) {
+                            new MapUtil(getApplicationContext(), aMap).showHistoryTraceThread(result);
+                        } else {
+                            Toast.makeText(getApplicationContext(), "网络异常,请检查网络", Toast.LENGTH_LONG).show();
+                            Logs.e(TAG, "网络异常");
+                        }
+
+                    }
+                });
+
             }
 
             @Override
@@ -68,32 +95,6 @@ public class History extends Activity implements VolleyCallBack, VolleyCallBack2
         });
 
     }
-
-    @Override
-    public void volleySolve(String result) {
-        if (result != null) {
-            Gson gson = new Gson();
-            List<Map<String, Object>> list = gson.fromJson(result, new TypeToken<List<Map<String, Object>>>() {
-            }.getType());
-            History_adapter adapter = new History_adapter(this, list);
-            spinner.setAdapter(adapter);
-            spinner.setSelection(list.size() - 1, true);
-        } else {
-            Logs.e(TAG, "网络异常");
-        }
-
-    }
-
-    @Override
-    public void volleySolve2(String result) {
-        Logs.d(TAG, result);
-        if (result != null) {
-            new MapUtil(this, aMap).showHistoryTraceThread(result);
-        } else {
-            Logs.e(TAG, "网络异常");
-        }
-    }
-
 
     @Override
     protected void onResume() {

@@ -12,16 +12,11 @@ import com.andros230.trace.network.VolleyCallBack;
 import com.andros230.trace.network.VolleyPost;
 import com.andros230.trace.utils.Logs;
 import com.andros230.trace.utils.util;
-import com.google.gson.Gson;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import okhttp3.internal.Util;
-
-public class DbOpenHelper extends SQLiteOpenHelper implements VolleyCallBack {
+public class DbOpenHelper extends SQLiteOpenHelper {
     private String TAG = "DbOpenHelper";
     private static final String TABLE_NAME = "trace";
     private final String table_sql = "CREATE TABLE " + TABLE_NAME + " (id INTEGER primary key autoincrement, lat text, lng text, date text,time text, status text);";
@@ -59,7 +54,7 @@ public class DbOpenHelper extends SQLiteOpenHelper implements VolleyCallBack {
     }
 
 
-    public void saveLatLng(LatLngKit kit) {
+    public void saveLatLng(final LatLngKit kit) {
         this.kit = kit;
         String uid = util.readUid(context);
         Map<String, String> params = new HashMap<>();
@@ -68,23 +63,28 @@ public class DbOpenHelper extends SQLiteOpenHelper implements VolleyCallBack {
         params.put("lng", kit.getLng());
         params.put("date", kit.getDate());
         params.put("time", kit.getTime());
-        new VolleyPost(context, this, util.ServerUrl + "RealTimeSaveLatLng", params).post();
+
+        new VolleyPost(context, util.ServerUrl + "RealTimeSaveLatLng", params, new VolleyCallBack() {
+            @Override
+            public void volleyResult(String result) {
+                if (result != null) {
+                    if (result.equals("YES")) {
+                        Logs.d(TAG, "实时坐标数据上传成功");
+                    } else {
+                        Logs.d(TAG, "实时坐标数据上传失败");
+                        insert(kit);
+                    }
+                } else {
+                    Logs.e(TAG, "网络异常,实时坐标数据上传失败");
+                    insert(kit);
+                }
+
+            }
+        });
+
+
     }
 
-    @Override
-    public void volleySolve(String result) {
-        if (result != null) {
-            if (result.equals("YES")) {
-                Logs.d(TAG, "实时坐标数据上传成功");
-            } else {
-                Logs.d(TAG, "实时坐标数据上传失败");
-                insert(kit);
-            }
-        } else {
-            Logs.e(TAG, "网络异常,实时坐标数据上传失败");
-            insert(kit);
-        }
-    }
 
     private void insert(LatLngKit kit) {
         SQLiteDatabase db = this.getWritableDatabase();
