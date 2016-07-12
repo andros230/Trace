@@ -2,6 +2,7 @@ package com.andros230.trace.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -18,7 +19,8 @@ import java.util.Date;
 import java.util.List;
 
 public class util {
-    public static final String ServerUrl = "http://192.168.18.105:8080/Trace/";
+
+
     private static final String NAME_UID = "com_andros230_UID";
     private static final String NAME_OPENID = "com_andros230_OPENID";
     private static final String NAME_MD5 = "com_andros230_MD4";
@@ -124,16 +126,16 @@ public class util {
         return ni != null && ni.isConnectedOrConnecting();
     }
 
-    /**
-     * Gps是否打开
-     *
-     * @param context
-     * @return
-     */
+    //Gps是否打开
     public static boolean isGpsEnabled(Context context) {
         LocationManager locationManager = ((LocationManager) context.getSystemService(Context.LOCATION_SERVICE));
-        List<String> accessibleProviders = locationManager.getProviders(true);
-        return accessibleProviders != null && accessibleProviders.size() > 0;
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
+    //检查是否有GPS权限
+    public static boolean gpsPermission(Context context) {
+        boolean permission = (PackageManager.PERMISSION_GRANTED == context.checkCallingOrSelfPermission("android.permission.ACCESS_FINE_LOCATION"));
+        return permission;
     }
 
 
@@ -227,4 +229,5 @@ public class util {
         util.clearOpenID(context);
         util.clearMD5(context);
     }
+
 }

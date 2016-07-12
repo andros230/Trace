@@ -87,8 +87,6 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         if (Value != null && Value.equals("qq")) {
             Toast.makeText(MainActivity.this, "QQ帐号登录成功", Toast.LENGTH_LONG).show();
         }
-
-
         init();
         AlarmCPU();
     }
@@ -166,7 +164,12 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
 
                 } else {
                     tv_status.setTextColor(Color.RED);
-                    tv_status.setText("定位误差过大,请使用GPS");
+                    boolean rs_gps = util.isGpsEnabled(this);
+                    if (rs_gps) {
+                        tv_status.setText("误差过大,请检查是否被权限管理软件拒绝定位");
+                    } else {
+                        tv_status.setText("误差过大,请开启GPS定位功能");
+                    }
                 }
 
             } else {
@@ -416,9 +419,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
     protected void dialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setMessage("确定退出当前帐号？");
-
         builder.setTitle("退出帐号");
-
         builder.setPositiveButton("退出", new DialogInterface.OnClickListener() {
 
             @Override

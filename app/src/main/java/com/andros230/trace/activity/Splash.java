@@ -1,6 +1,8 @@
 package com.andros230.trace.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,15 +33,36 @@ public class Splash extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
         Logs.OPENDEBUG = true;
+        if (util.isNetworkConnected(this)) {
+            bmobUpdate();
+        } else {
+            networkDialog();
+        }
 
-        bmobUpdate();
+    }
 
 
+    protected void networkDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setMessage("当前网络不可用,请检查网络");
+        builder.setTitle("网络异常");
+        builder.setPositiveButton("退出", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                Splash.this.finish();
+            }
+        });
+        builder.setCancelable(false);
+        builder.show();
     }
 
 
     public void bmobUpdate() {
         Bmob.initialize(this, "eeb802dacc8153d5f4679cbcff1a8daf");
+        BmobUpdateAgent.setUpdateOnlyWifi(false);
+        BmobUpdateAgent.update(this);
         BmobUpdateAgent.setUpdateListener(new BmobUpdateListener() {
             @Override
             public void onUpdateReturned(int i, UpdateResponse updateResponse) {
@@ -52,7 +75,7 @@ public class Splash extends Activity {
 
             }
         });
-        BmobUpdateAgent.update(this);
+
 
         //监听对话框按键操作
         BmobUpdateAgent.setDialogListener(new BmobDialogButtonListener() {
