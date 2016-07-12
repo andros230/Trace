@@ -14,7 +14,7 @@
         android:layout_marginRight="10dp"
         android:layout_marginTop="10dp"
         android:background="@drawable/frame"
-        android:hint="请填写具体内容帮助我们了解您的意见和建议(如可以请留下QQ或邮箱方便我们联系您)"
+        android:hint="请填写具体内容帮助我们了解您的意见和建议"
 
         />
 

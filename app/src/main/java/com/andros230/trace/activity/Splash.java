@@ -15,6 +15,13 @@ import com.andros230.trace.utils.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.bmob.v3.Bmob;
+import cn.bmob.v3.listener.BmobDialogButtonListener;
+import cn.bmob.v3.listener.BmobUpdateListener;
+import cn.bmob.v3.update.BmobUpdateAgent;
+import cn.bmob.v3.update.UpdateResponse;
+import cn.bmob.v3.update.UpdateStatus;
+
 public class Splash extends Activity {
     private String TAG = "Splash";
 
@@ -25,7 +32,43 @@ public class Splash extends Activity {
         setContentView(R.layout.activity_splash);
         Logs.OPENDEBUG = true;
 
+        bmobUpdate();
 
+
+    }
+
+
+    public void bmobUpdate() {
+        Bmob.initialize(this, "eeb802dacc8153d5f4679cbcff1a8daf");
+        BmobUpdateAgent.setUpdateListener(new BmobUpdateListener() {
+            @Override
+            public void onUpdateReturned(int i, UpdateResponse updateResponse) {
+                if (i == UpdateStatus.No || i == UpdateStatus.IGNORED) {
+                    openIDCheck();
+                    Logs.d(TAG, "无需更新版本或被忽略更新");
+                } else {
+                    Logs.d(TAG, "有新版本可用");
+                }
+
+            }
+        });
+        BmobUpdateAgent.update(this);
+
+        //监听对话框按键操作
+        BmobUpdateAgent.setDialogListener(new BmobDialogButtonListener() {
+            @Override
+            public void onClick(int i) {
+                if (i == UpdateStatus.NotNow) {
+                    Logs.d(TAG, "点击了以后再说");
+                    openIDCheck();
+                }
+            }
+        });
+
+    }
+
+
+    public void openIDCheck() {
         String openID = util.readOpenID(this);
         if (openID != null) {
 
@@ -61,13 +104,14 @@ public class Splash extends Activity {
             if (openID == null) {
                 Logs.d(TAG, "openID is null");
                 startActivity(new Intent(getApplication(), Login.class));
-                Splash.this.finish();
+                finish();
             } else {
                 Logs.d(TAG, "openID:" + openID);
                 startActivity(new Intent(getApplication(), MainActivity.class));
-                Splash.this.finish();
+                finish();
             }
         }
     }
+
 
 }

@@ -1,6 +1,5 @@
 package com.andros230.trace.utils;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
@@ -59,10 +58,10 @@ public class BaseUIListener implements IUiListener {
                             util.writeUid(context, result);
                             //删除旧数据
                             new DbOpenHelper(context).dropTable();
-                            Toast.makeText(context, "登录成功", Toast.LENGTH_LONG).show();
                             Logs.d(TAG, "QQ登录成功");
 
                             Intent intent = new Intent();
+                            intent.putExtra("extra", "qq");
                             intent.setClass(context, MainActivity.class);
                             context.startActivity(intent);
                             new Login().close();

@@ -85,7 +85,7 @@ public class Login extends Activity {
 
     public void qq_button(View view) {
 
-        Tencent mTencent = Tencent.createInstance("222222", this.getApplicationContext());
+        Tencent mTencent = Tencent.createInstance("1105460525", this.getApplicationContext());
         if (!mTencent.isSessionValid()) {
             mTencent.login(this, "all", new BaseUIListener(this));
         }
@@ -138,7 +138,7 @@ public class Login extends Activity {
                             util.writeUid(getApplicationContext(), result);
                             //删除旧数据
                             new DbOpenHelper(getApplicationContext()).dropTable();
-                            Toast.makeText(Login.this, "登录成功", Toast.LENGTH_LONG).show();
+                            Toast.makeText(Login.this, "微博帐号登录成功", Toast.LENGTH_LONG).show();
                             Logs.d(TAG, "weibo登录成功");
 
                             Intent intent = new Intent();

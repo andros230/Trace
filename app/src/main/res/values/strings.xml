@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Trace</string>
+    <string name="app_name">蜗牛足迹</string>
     <string name="title_activity_show_trace_map">ShowTraceMap</string>
 </resources>

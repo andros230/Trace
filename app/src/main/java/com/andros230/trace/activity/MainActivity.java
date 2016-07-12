@@ -31,6 +31,7 @@ import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.AMapOptions;
+import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
@@ -50,6 +51,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import cn.bmob.v3.listener.BmobDialogButtonListener;
+import cn.bmob.v3.listener.BmobUpdateListener;
+import cn.bmob.v3.update.BmobUpdateAgent;
+import cn.bmob.v3.update.UpdateResponse;
+import cn.bmob.v3.update.UpdateStatus;
 
 public class MainActivity extends Activity implements LocationSource, AMapLocationListener {
     private MapView mMapView;
@@ -74,6 +81,14 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         setContentView(R.layout.activity_main);
         mMapView = (MapView) findViewById(R.id.main_map);
         mMapView.onCreate(savedInstanceState);
+
+        Intent intent = getIntent();
+        String Value = intent.getStringExtra("extra");
+        if (Value != null && Value.equals("qq")) {
+            Toast.makeText(MainActivity.this, "QQ帐号登录成功", Toast.LENGTH_LONG).show();
+        }
+
+
         init();
         AlarmCPU();
     }
@@ -107,6 +122,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
 
     private double temp_lat;
     private double temp_lng;
+    private boolean bool_moveCamera = true;
 
     @Override
     public void onLocationChanged(AMapLocation aMapLocation) {
@@ -115,6 +131,11 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
                 mListener.onLocationChanged(aMapLocation);  // 显示系统小蓝点
                 double lat = aMapLocation.getLatitude();
                 double lng = aMapLocation.getLongitude();
+
+                if (bool_moveCamera) {
+                    aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 17));
+                    bool_moveCamera = false;
+                }
 
                 if (bool) {
                     chronometer.setBase(SystemClock.elapsedRealtime());
@@ -145,9 +166,8 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
 
                 } else {
                     tv_status.setTextColor(Color.RED);
-                    tv_status.setText("定位误差过大");
+                    tv_status.setText("定位误差过大,请使用GPS");
                 }
-
 
             } else {
                 tv_status.setTextColor(Color.RED);
@@ -338,6 +358,31 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
                     Intent intent = new Intent();
                     intent.setClass(MainActivity.this, Feedback.class);
                     startActivity(intent);
+                } else if (getdata().get(i).equals("版本更新")) {
+                    //发起自动更新
+                    Logs.d(TAG, "版本更新");
+                    BmobUpdateAgent.forceUpdate(MainActivity.this);
+                    BmobUpdateAgent.setUpdateListener(new BmobUpdateListener() {
+                        @Override
+                        public void onUpdateReturned(int i, UpdateResponse updateResponse) {
+                            if (i == UpdateStatus.No) {
+                                Logs.d(TAG, "当前已是最新版本");
+                                Toast.makeText(MainActivity.this, "当前已是最新版本", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+
+                    //监听对话框按键操作
+                    BmobUpdateAgent.setDialogListener(new BmobDialogButtonListener() {
+                        @Override
+                        public void onClick(int i) {
+                            if (i == UpdateStatus.NotNow) {
+                                Logs.d(TAG, "点击了以后再说");
+                            }
+                        }
+                    });
+
+
                 }
             }
         });
@@ -360,6 +405,7 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         List<String> data = new ArrayList<>();
         data.add("历史轨迹");
         data.add("意见反馈");
+        data.add("版本更新");
         String openID = util.readOpenID(getApplicationContext());
         if (openID != null) {
             data.add("退出帐号");
