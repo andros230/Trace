@@ -15,7 +15,6 @@ import java.util.Map;
 
 public class VolleyPost {
     private String TAG = "VolleyPost";
-
     //Map<String, String> params = new HashMap<>();
     //params.put("way", "way");
     public VolleyPost(Context context, String url, final Map<String, String> params, final VolleyCallBack callBack) {
@@ -32,7 +31,6 @@ public class VolleyPost {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.e(TAG, error.toString());
-                Logs.e(TAG, error.toString());
                 callBack.volleyResult(null);
             }
         }) {
@@ -44,6 +42,7 @@ public class VolleyPost {
         requestQueue.add(postRequest);
     }
 }
+
 
 
 

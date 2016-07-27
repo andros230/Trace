@@ -27,7 +27,6 @@ import cn.bmob.v3.update.UpdateStatus;
 public class Splash extends Activity {
     private String TAG = "Splash";
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,7 +37,6 @@ public class Splash extends Activity {
         } else {
             networkDialog();
         }
-
     }
 
 
@@ -67,7 +65,7 @@ public class Splash extends Activity {
             @Override
             public void onUpdateReturned(int i, UpdateResponse updateResponse) {
                 if (i == UpdateStatus.No || i == UpdateStatus.IGNORED) {
-                    openIDCheck();
+                    md5Check();
                     Logs.d(TAG, "无需更新版本或被忽略更新");
                 } else {
                     Logs.d(TAG, "有新版本可用");
@@ -83,7 +81,7 @@ public class Splash extends Activity {
             public void onClick(int i) {
                 if (i == UpdateStatus.NotNow) {
                     Logs.d(TAG, "点击了以后再说");
-                    openIDCheck();
+                    md5Check();
                 }
             }
         });
@@ -91,14 +89,13 @@ public class Splash extends Activity {
     }
 
 
-    public void openIDCheck() {
-        String openID = util.readOpenID(this);
-        if (openID != null) {
-
+    public void md5Check() {
+        String uid = util.readUid(this);
+        if (uid != null) {
             Map<String, String> params = new HashMap<>();
-            params.put("openID", openID);
-            String md5 = util.readMD5(this);
-            params.put("md5", md5);
+            params.put("uid", uid);
+            params.put("md5", util.readMD5(this));
+            Logs.d(TAG, util.readMD5(this));
             new VolleyPost(this, util.ServerUrl + "UserCheck", params, new VolleyCallBack() {
                 @Override
                 public void volleyResult(String result) {
@@ -114,7 +111,6 @@ public class Splash extends Activity {
                     }
                 }
             });
-
         } else {
             Handler x = new Handler();
             x.postDelayed(new splashHandler(), 100);
@@ -123,14 +119,15 @@ public class Splash extends Activity {
 
     class splashHandler implements Runnable {
         public void run() {
-            String openID = util.readOpenID(getApplicationContext());
-            if (openID == null) {
-                Logs.d(TAG, "openID is null");
+            String uid = util.readUid(getApplicationContext());
+            Logs.d(TAG, uid);
+            if (uid == null) {
+                Logs.d(TAG, "uid is null");
                 startActivity(new Intent(getApplication(), Login.class));
                 finish();
             } else {
-                Logs.d(TAG, "openID:" + openID);
-                startActivity(new Intent(getApplication(), MainActivity.class));
+                Logs.d(TAG, "uid:" + uid);
+                startActivity(new Intent(getApplication(), GroupList.class));
                 finish();
             }
         }

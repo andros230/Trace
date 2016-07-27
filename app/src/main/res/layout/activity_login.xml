@@ -3,53 +3,55 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:background="#4A708B"
     android:layout_height="match_parent"
+    android:background="#4A708B"
     tools:context="com.andros230.trace.activity.Login">
 
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="36dp"
+        android:src="@drawable/icon192"/>
 
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/imageView"
+        android:layout_centerHorizontal="true"
+        android:text="蜗牛足迹"
+        android:textColor="@android:color/background_light"/>
 
 
     <Button
         android:id="@+id/weibo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
         android:background="@drawable/bg"
         android:onClick="weibo_Button"
         android:text="微博帐号登录"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
-        android:textColor="@android:color/background_light"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"/>
+        android:textColor="@android:color/background_light"/>
+
     <Button
         android:id="@+id/QQ"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
-        android:text="QQ帐号登录"
-        android:onClick="qq_button"
-        android:textColor="@android:color/background_light"
-        android:layout_marginTop="22dp"
         android:layout_below="@+id/weibo"
-        android:layout_centerHorizontal="true"/>
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg"
+        android:layout_centerHorizontal="true"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
-        android:onClick="experience"
-        android:text="直接进入"
-        android:textColor="@android:color/background_light"
-        android:layout_below="@+id/QQ"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="22dp"/>
-
-
+        android:layout_marginTop="22dp"
+        android:background="@drawable/bg"
+        android:onClick="qq_button"
+        android:text="QQ帐号登录"
+        android:textColor="@android:color/background_light"/>
 
 
 </RelativeLayout>
