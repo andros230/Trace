@@ -17,7 +17,7 @@ import java.util.Date;
 
 public class util {
 
-    public static final String ServerUrl = "http://192.168.18.105:8080/Trace/";
+    public static final String ServerUrl = "http://192.168.18.110:8080/Trace/";
     private static final String NAME_UID = "com_andros230_UID";
     private static final String NAME_MD5 = "com_andros230_MD5";
     private static String TAG = "util";

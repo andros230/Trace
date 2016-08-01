@@ -147,7 +147,7 @@ public class Login extends Activity {
                     Logs.d(TAG, util.readUid(getApplicationContext()));
                     Toast.makeText(Login.this, "帐号登录成功", Toast.LENGTH_LONG).show();
                     Intent intent = new Intent();
-                    intent.setClass(Login.this, GroupList.class);
+                    intent.setClass(Login.this, FragmentMain.class);
                     startActivity(intent);
                     finish();
                 } else {

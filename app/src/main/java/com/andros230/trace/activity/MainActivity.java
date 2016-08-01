@@ -4,6 +4,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -11,6 +15,7 @@ import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.AMapOptions;
+import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
@@ -41,6 +46,9 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
 
     private String TAG = "MainActivity";
     private String groupID;
+    private TextView tv_num;
+    private ListView list;
+    private List<LatLngKit> kits;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,11 +56,23 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
         setContentView(R.layout.activity_main);
         Intent intent = getIntent();
         groupID = intent.getStringExtra("groupID");
+        tv_num = (TextView) findViewById(R.id.mainActivity_tv_num);
+        list = (ListView) findViewById(R.id.mainActivity_listView);
 
         mMapView = (MapView) findViewById(R.id.main_map);
         mMapView.onCreate(savedInstanceState);
 
         init();
+
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                double rs_lat = Double.valueOf(kits.get(i).getLat());
+                double rs_lng = Double.valueOf(kits.get(i).getLng());
+                aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(rs_lat, rs_lng), 15));
+
+            }
+        });
     }
 
     private void init() {
@@ -87,8 +107,11 @@ public class MainActivity extends Activity implements LocationSource, AMapLocati
                         if (result != null) {
                             aMap.clear(true);
                             Gson gson = new Gson();
-                            List<LatLngKit> kits = gson.fromJson(result, new TypeToken<List<LatLngKit>>() {
+                            kits = gson.fromJson(result, new TypeToken<List<LatLngKit>>() {
                             }.getType());
+                            tv_num.setText("在线人数:" + (kits.size() + 1));
+                            MainAdapter adapter = new MainAdapter(MainActivity.this, kits);
+                            list.setAdapter(adapter);
                             for (int i = 0; i < kits.size(); i++) {
                                 LatLngKit kit = kits.get(i);
                                 double rs_lat = Double.valueOf(kit.getLat());

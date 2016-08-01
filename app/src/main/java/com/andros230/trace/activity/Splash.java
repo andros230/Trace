@@ -127,7 +127,7 @@ public class Splash extends Activity {
                 finish();
             } else {
                 Logs.d(TAG, "uid:" + uid);
-                startActivity(new Intent(getApplication(), GroupList.class));
+                startActivity(new Intent(getApplication(), FragmentMain.class));
                 finish();
             }
         }
